@@ -8,4 +8,6 @@ router
   .get(userControllers.getAnUserByEmail)
   .post(userControllers.saveAUser);
 
+router.route("/addMember").put(userControllers.addUserToNewOrganization);
+
 module.exports = router;

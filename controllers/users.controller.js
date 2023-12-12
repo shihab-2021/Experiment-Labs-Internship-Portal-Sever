@@ -23,3 +23,47 @@ module.exports.saveAUser = async (req, res, next) => {
   const result = await userCollection.insertOne(user);
   res.send(result);
 };
+
+module.exports.addUserToNewOrganization = async (req, res, next) => {
+  const updatedUserData = req.body; // Assuming this object is sent from the frontend
+
+  try {
+    // Extract email from the incoming data
+    const { email } = updatedUserData;
+
+    // Find the user based on the email
+    const user = await userCollection.findOne({ email });
+
+    if (!user) {
+      return res.status(404).send({ message: "User not found" });
+    }
+
+    // Ensure the organizations array exists in the user profile
+    if (!user.organizations || !Array.isArray(user.organizations)) {
+      user.organizations = []; // Initialize organizations array if it doesn't exist
+    }
+
+    // Check for organizationId and role, then update or push to the organizations array
+    const { organizationId, role } = updatedUserData;
+
+    const existingOrganization = user.organizations.find(
+      (org) => org.organizationId === organizationId
+    );
+
+    if (!existingOrganization) {
+      // Push a new object to the organizations array if not present
+      user.organizations.push({ organizationId, role });
+    } else {
+      // Update role if organizationId already exists
+      existingOrganization.role = role;
+    }
+
+    // Save the updated user data back to the database
+    await userCollection.updateOne({ email }, { $set: user });
+
+    res.send({ message: "User profile updated successfully", user });
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    res.status(500).send({ message: "Error updating user profile" });
+  }
+};
