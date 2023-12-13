@@ -67,3 +67,21 @@ module.exports.addUserToNewOrganization = async (req, res, next) => {
     res.status(500).send({ message: "Error updating user profile" });
   }
 };
+
+module.exports.getUsersByOrganization = async (req, res, next) => {
+  const { organizationId } = req.params;
+
+  try {
+    // Find users where the organizations array contains the specified organizationId
+    const users = await userCollection
+      .find({
+        "organizations.organizationId": organizationId,
+      })
+      .toArray();
+
+    res.status(200).json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ error: "Error fetching users" });
+  }
+};

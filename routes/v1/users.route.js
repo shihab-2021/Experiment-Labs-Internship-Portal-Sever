@@ -10,4 +10,8 @@ router
 
 router.route("/addMember").put(userControllers.addUserToNewOrganization);
 
+router
+  .route("/usersByOrganization/:organizationId")
+  .get(userControllers.getUsersByOrganization);
+
 module.exports = router;
