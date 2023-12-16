@@ -7,4 +7,8 @@ router
   .route("/")
   .post(chatControllers.createChat);
 
+router
+  .route("/userId/:userId")
+  .get(chatControllers.getChatByUserId);
+
 module.exports = router;
