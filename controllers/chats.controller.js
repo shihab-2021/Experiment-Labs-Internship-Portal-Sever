@@ -22,7 +22,7 @@ module.exports.createChat = async (req, res, next) => {
             message: 'Chat created successfully',
             result
         });
-        
+
     } catch (error) {
         res.status(500).json({
             success: false,
@@ -31,3 +31,21 @@ module.exports.createChat = async (req, res, next) => {
     }
 
 };
+
+
+module.exports.getChatByUserId = async (req, res, next) => {
+    try {
+        const userId = req.params.userId;
+        const userChats = await chatCollection.find({ 'users._id': userId }).toArray();
+
+        res.status(200).json({
+            success: true,
+            userChats
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: 'Failed to fetch chats'
+        });
+    }
+}
