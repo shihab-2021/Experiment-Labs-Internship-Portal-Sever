@@ -8,22 +8,36 @@ const userCollection = client
   .collection("users");
 
 module.exports.createAnOrganization = async (req, res, next) => {
-  const user = req.body;
-  const result = await orgCollection.insertOne(user);
+  const org = req.body;
+  const result = await orgCollection.insertOne(org);
   const organizationId = result.insertedId;
-  const email = user.email;
+  const email = org.officialEmail;
   const filter = { email: email };
-  const options = { upsert: true };
+  const userDoc = await userCollection.findOne(filter);
+
+  const organizationObj = {
+    organizationId: "" + organizationId,
+    role: "Admin",
+  };
+
+  // If user has organizations array, push the new organization, else create a new array
+  if (
+    userDoc &&
+    userDoc.organizations &&
+    Array.isArray(userDoc.organizations)
+  ) {
+    userDoc.organizations.push(organizationObj);
+  } else {
+    userDoc.organizations = [organizationObj];
+  }
 
   const updatedDoc = {
     $set: {
-      organizationId: "" + organizationId,
-      organizationName: "" + user?.organizationName,
-      role: "Admin",
+      organizations: userDoc.organizations,
     },
   };
 
-  const newResult = await userCollection.updateOne(filter, updatedDoc, options);
+  const newResult = await userCollection.updateOne(filter, updatedDoc);
   res.send({ result, newResult });
 };
 
