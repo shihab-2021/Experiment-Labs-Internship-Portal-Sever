@@ -6,6 +6,7 @@ const port = process.env.PORT || 5000;
 const errorHandler = require("./middleware/errorHandler");
 const testRoutes = require("./routes/v1/test.route");
 const userRoutes = require("./routes/v1/users.route");
+const chatRoutes = require("./routes/v1/chats.route");
 
 app.get("/", (req, res) => {
   res.send("Hello world");
@@ -20,6 +21,9 @@ app.use(errorHandler);
 
 // Attach your routes after the error handler
 app.use("/api/v1/test", testRoutes);
+
+//for chats
+app.use("/api/v1/chats", chatRoutes);
 
 // For users
 app.use("/api/v1/users", userRoutes);
