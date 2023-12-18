@@ -7,6 +7,7 @@ const errorHandler = require("./middleware/errorHandler");
 const testRoutes = require("./routes/v1/test.route");
 const userRoutes = require("./routes/v1/users.route");
 const chatRoutes = require("./routes/v1/chats.route");
+const messageRoutes = require("./routes/v1/messages.route");
 const organizationRoutes = require("./routes/v1/organizations.route");
 const taskRoutes = require("./routes/v1/tasks.route");
 const uploadFileRoutes = require("./routes/v1/uploadFile.route");
@@ -27,6 +28,9 @@ app.use("/api/v1/test", testRoutes);
 
 //for chats
 app.use("/api/v1/chats", chatRoutes);
+
+//for messages
+app.use("/api/v1/messages", messageRoutes);
 
 // For users
 app.use("/api/v1/users", userRoutes);
