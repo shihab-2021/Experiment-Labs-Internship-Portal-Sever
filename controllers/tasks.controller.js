@@ -58,7 +58,7 @@ module.exports.deleteATask = async (req, res, next) => {
 
 module.exports.applyForTask = async (req, res, next) => {
   const { taskId } = req.params;
-  const { participantEmail, applyDateTime } = req.body;
+  const { participantEmail, applyDateTime, organizationId } = req.body;
 
   try {
     const taskQuery = { _id: ObjectId(taskId) };
@@ -84,10 +84,22 @@ module.exports.applyForTask = async (req, res, next) => {
         .json({ message: "Participant has already applied for this task" });
     }
 
+    const insertedSubmission = await taskSubmissionCollection.insertOne({
+      aboutSolution: "",
+      fileLink: "",
+      participantEmail: participantEmail,
+      taskId: taskId,
+      organizationId: organizationId,
+      submissionDateTime: "",
+      applyDateTime: applyDateTime,
+      submissionStatus: "Processing",
+    });
+
     // Add participant application to the task
     const participantInfo = {
       participantEmail,
       applyDateTime,
+      submissionId: String(insertedSubmission.insertedId),
     };
 
     task.participants.push(participantInfo);
