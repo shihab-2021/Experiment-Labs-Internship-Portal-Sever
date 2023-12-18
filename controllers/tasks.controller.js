@@ -33,6 +33,18 @@ module.exports.getTasksByOrganizationAndStatus = async (req, res, next) => {
   res.send(tasks);
 };
 
+module.exports.getTasksByStatus = async (req, res, next) => {
+  const { taskStatus } = req.params;
+
+  // Construct the query based on organizationId and taskStatus
+  const query = {
+    taskStatus: taskStatus, // Assuming taskStatus is a string field in the document
+  };
+
+  const tasks = await taskCollection.find(query).toArray();
+  res.send(tasks);
+};
+
 module.exports.getAllTask = async (req, res, next) => {
   const result = await taskCollection.find({}).toArray();
   res.send(result);
