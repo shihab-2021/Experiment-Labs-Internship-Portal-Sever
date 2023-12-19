@@ -11,6 +11,13 @@ module.exports.getAnUserByEmail = async (req, res, next) => {
   res.send(user);
 };
 
+module.exports.getAnUserById = async (req, res, next) => {
+  const { id } = req.params;
+  const query = { _id: new ObjectId(id) };
+  const user = await userCollection.findOne(query);
+  res.send(user);
+};
+
 module.exports.saveAUser = async (req, res, next) => {
   const user = req.body;
 
@@ -86,24 +93,20 @@ module.exports.getUsersByOrganization = async (req, res, next) => {
   }
 };
 
-
 module.exports.getUserById = async (req, res, next) => {
   try {
     const id = req.params.id;
     const userData = await userCollection.findOne({ _id: new ObjectId(id) });
-    const {password,...user} = userData;
-    
+    const { password, ...user } = userData;
+
     res.status(200).json({
       success: true,
-      user
+      user,
     });
-
   } catch (error) {
-
     res.status(500).json({
       success: false,
-      error: "Error fetching users"
+      error: "Error fetching users",
     });
-
   }
-}
+};
