@@ -38,7 +38,7 @@ module.exports.getChatByUserId = async (req, res, next) => {
         const userId = req.params.userId;
         const userChats = await chatCollection.find({ 'users._id': userId }).toArray();
 
-        res.status(200).json({
+        res.status(200).send({
             success: true,
             userChats
         });

@@ -2,15 +2,10 @@ const { ObjectId } = require("mongodb");
 const client = require("../utils/dbConnect");
 const messageCollection = client.db('ExperimentLabsInternshipPortal').collection('messages');
 const chatCollection = client.db('ExperimentLabsInternshipPortal').collection('chats');
-const userCollection = client.db("ExperimentLabsInternshipPortal").collection("users");
 
 module.exports.sendMessage = async (req, res, next) => {
     try {
         const { senderId, content, contentType, chatId } = req.body;
-
-        // Retrieve sender details from the users collection
-        const sender = await userCollection.findOne({ _id: new ObjectId(senderId) });
-
 
         // Retrieve chat details from the chats collection
         const chat = await chatCollection.findOne({
@@ -27,7 +22,7 @@ module.exports.sendMessage = async (req, res, next) => {
 
         const message = {
             chat: updatedChat,
-            sender,
+            senderId,
             content,
             contentType,
             createdAt: new Date(),
