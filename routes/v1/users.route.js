@@ -8,7 +8,10 @@ router
   .get(userControllers.getAnUserByEmail)
   .post(userControllers.saveAUser);
 
-router.route("/:id").get(userControllers.getAnUserById);
+router
+  .route("/:id")
+  .get(userControllers.getAnUserById)
+  .patch(userControllers.updateUserById);
 
 router.route("/addMember").put(userControllers.addUserToNewOrganization);
 

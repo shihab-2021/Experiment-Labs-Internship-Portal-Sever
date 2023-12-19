@@ -18,6 +18,32 @@ module.exports.getAnUserById = async (req, res, next) => {
   res.send(user);
 };
 
+module.exports.updateUserById = async (req, res, next) => {
+  const userId = req.params.id;
+  const userData = req.body; // Data to update in the user object
+
+  try {
+    const query = { _id: ObjectId(userId) };
+    const update = { $set: userData };
+
+    const updatedUser = await userCollection.findOneAndUpdate(query, update, {
+      returnOriginal: false, // To get the updated document
+    });
+
+    if (updatedUser.value) {
+      res.status(200).json({
+        message: "User updated successfully",
+        user: updatedUser.value,
+      });
+    } else {
+      res.status(404).json({ message: "User not found" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports.saveAUser = async (req, res, next) => {
   const user = req.body;
 
