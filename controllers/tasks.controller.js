@@ -33,6 +33,18 @@ module.exports.getTasksByOrganizationAndStatus = async (req, res, next) => {
   res.send(tasks);
 };
 
+module.exports.getTasksByStatus = async (req, res, next) => {
+  const { taskStatus } = req.params;
+
+  // Construct the query based on organizationId and taskStatus
+  const query = {
+    taskStatus: taskStatus, // Assuming taskStatus is a string field in the document
+  };
+
+  const tasks = await taskCollection.find(query).toArray();
+  res.send(tasks);
+};
+
 module.exports.getAllTask = async (req, res, next) => {
   const result = await taskCollection.find({}).toArray();
   res.send(result);
@@ -46,7 +58,7 @@ module.exports.deleteATask = async (req, res, next) => {
 
 module.exports.applyForTask = async (req, res, next) => {
   const { taskId } = req.params;
-  const { participantEmail, applyDateTime } = req.body;
+  const { participantEmail, applyDateTime, organizationId } = req.body;
 
   try {
     const taskQuery = { _id: ObjectId(taskId) };
@@ -72,10 +84,22 @@ module.exports.applyForTask = async (req, res, next) => {
         .json({ message: "Participant has already applied for this task" });
     }
 
+    const insertedSubmission = await taskSubmissionCollection.insertOne({
+      aboutSolution: "",
+      fileLink: "",
+      participantEmail: participantEmail,
+      taskId: taskId,
+      organizationId: organizationId,
+      submissionDateTime: "",
+      applyDateTime: applyDateTime,
+      submissionStatus: "Processing",
+    });
+
     // Add participant application to the task
     const participantInfo = {
       participantEmail,
       applyDateTime,
+      submissionId: String(insertedSubmission.insertedId),
     };
 
     task.participants.push(participantInfo);

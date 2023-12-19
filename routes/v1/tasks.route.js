@@ -17,6 +17,8 @@ router
   .route("/organizationId/:organizationId/taskStatus/:taskStatus")
   .get(tasksControllers.getTasksByOrganizationAndStatus);
 
+router.route("/taskStatus/:taskStatus").get(tasksControllers.getTasksByStatus);
+
 router.route("/applyTask/:taskId").put(tasksControllers.applyForTask);
 
 router.route("/submitTask").post(tasksControllers.submitATask);
