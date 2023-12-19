@@ -85,3 +85,25 @@ module.exports.getUsersByOrganization = async (req, res, next) => {
     res.status(500).json({ error: "Error fetching users" });
   }
 };
+
+
+module.exports.getUserById = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const userData = await userCollection.findOne({ _id: new ObjectId(id) });
+    const {password,...user} = userData;
+    
+    res.status(200).json({
+      success: true,
+      user
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      success: false,
+      error: "Error fetching users"
+    });
+
+  }
+}
