@@ -18,3 +18,10 @@ module.exports.getSubmissionsByParticipantEmail = async (req, res, next) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+module.exports.getATaskSubmissionById = async (req, res, next) => {
+  const { submissionId } = req.params;
+  const query = { _id: new ObjectId(submissionId) };
+  const user = await taskSubmissionCollection.findOne(query);
+  res.send(user);
+};

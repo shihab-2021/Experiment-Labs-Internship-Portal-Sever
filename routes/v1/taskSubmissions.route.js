@@ -7,4 +7,8 @@ router
   .route("/submissions/:participantEmail")
   .get(taskSubmissionsController.getSubmissionsByParticipantEmail);
 
+router
+  .route("/:submissionId")
+  .get(taskSubmissionsController.getATaskSubmissionById);
+
 module.exports = router;
