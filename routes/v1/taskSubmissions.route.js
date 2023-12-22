@@ -4,7 +4,7 @@ const taskSubmissionsController = require("../../controllers/taskSubmissions.con
 const router = express.Router();
 
 router
-  .route("/selectedSubmissions")
+  .route("/submissionStatus/:submissionStatus")
   .get(taskSubmissionsController.getTaskSubmissionsBySubmissionStatus);
 
 router

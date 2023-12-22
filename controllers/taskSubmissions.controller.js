@@ -32,11 +32,12 @@ module.exports.getTaskSubmissionsBySubmissionStatus = async (
   next
 ) => {
   try {
+    const { submissionStatus } = req.params;
     const threeMonthsAgo = new Date();
     threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3); // Calculate date 3 months ago
 
     const query = {
-      submissionStatus: "Selected",
+      submissionStatus, // Use the submissionStatus from params
       submissionDateTime: {
         $gte: threeMonthsAgo.toISOString(), // SubmissionDateTime should be greater than or equal to 3 months ago
         $lt: new Date().toISOString(), // SubmissionDateTime should be less than current date
