@@ -68,6 +68,7 @@ module.exports.addUserToNewOrganization = async (req, res, next) => {
   }
 };
 
+
 module.exports.getUsersByOrganization = async (req, res, next) => {
   const { organizationId } = req.params;
 
