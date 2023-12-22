@@ -56,9 +56,49 @@ app.all("*", (req, res) => {
   res.send("No route found.");
 });
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
+
+
+const io = require("socket.io")(server, {
+  // pingTimeout: 60000,
+  cors: {
+    origin: process.env.Origin
+  },
+});
+
+io.on("connection", (socket) => {
+  console.log("Connected to socket.io");
+
+  socket.on("setup", (userData) => {
+    socket.join(userData._id);
+    socket.emit("connected");
+  });
+
+  socket.on("join chat", (room) => {
+    socket.join(room);
+    console.log("User Joined Room: " + room);
+  });
+
+  socket.on("new message", (newMessageReceived) => {
+    let chat = newMessageReceived.chat;
+
+    if (!chat.users) return console.log("chat.users not defined");
+    // console.log(newMessageReceived);
+
+    chat.users.forEach((user) => {
+      if (user._id === newMessageReceived.senderId) return;
+      socket.in(user?._id).emit("message received", newMessageReceived);
+    });
+  });
+
+  socket.off("setup", () => {
+    console.log("USER DISCONNECTED");
+    socket.leave(userData._id);
+  });
+});
+
 
 process.on("unhandledRejection", (error) => {
   console.log(error.name, error.message);
