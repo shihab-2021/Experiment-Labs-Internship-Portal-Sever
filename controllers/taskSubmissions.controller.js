@@ -47,7 +47,7 @@ module.exports.getTaskSubmissionsBySubmissionStatus = async (
     const tasks = await taskSubmissionCollection.find(query).toArray();
 
     if (tasks.length > 0) {
-      res.status(200).json({ message: "Tasks found", tasks });
+      res.status(200).json(tasks);
     } else {
       res.status(404).json({ message: "No tasks found" });
     }
