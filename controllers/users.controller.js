@@ -11,12 +11,12 @@ module.exports.getAnUserByEmail = async (req, res, next) => {
   res.send(user);
 };
 
-module.exports.getAnUserById = async (req, res, next) => {
-  const { id } = req.params;
-  const query = { _id: new ObjectId(id) };
-  const user = await userCollection.findOne(query);
-  res.send(user);
-};
+// module.exports.getAnUserById = async (req, res, next) => {
+//   const { id } = req.params;
+//   const query = { _id: new ObjectId(id) };
+//   const user = await userCollection.findOne(query);
+//   res.send(user);
+// };
 
 module.exports.updateUserById = async (req, res, next) => {
   const userId = req.params.id;
