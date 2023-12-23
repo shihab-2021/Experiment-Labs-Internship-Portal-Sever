@@ -21,4 +21,8 @@ router
 
 router.route("/:id").get(userControllers.getUserById);
 
+router
+  .route("/userId/:userId/organizationId/:organizationId")
+  .put(userControllers.removeMemberFromOrganization);
+
 module.exports = router;
