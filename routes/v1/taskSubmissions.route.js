@@ -3,6 +3,8 @@ const taskSubmissionsController = require("../../controllers/taskSubmissions.con
 
 const router = express.Router();
 
+router.route("/leaderBoard").get(taskSubmissionsController.generateLeaderBoard);
+
 router
   .route("/submissionStatus/:submissionStatus")
   .get(taskSubmissionsController.getTaskSubmissionsBySubmissionStatus);
