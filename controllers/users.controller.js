@@ -101,7 +101,6 @@ module.exports.addUserToNewOrganization = async (req, res, next) => {
   }
 };
 
-
 module.exports.getUsersByOrganization = async (req, res, next) => {
   const { organizationId } = req.params;
 
@@ -135,5 +134,36 @@ module.exports.getUserById = async (req, res, next) => {
       success: false,
       error: "Error fetching users",
     });
+  }
+};
+
+module.exports.removeMemberFromOrganization = async (req, res) => {
+  const { userId, organizationId } = req.params;
+
+  try {
+    // Fetch user data by userId
+    const user = await userCollection.findOne({ _id: new ObjectId(userId) });
+
+    // If user not found, return 404 Not Found
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Filter out the organization to remove from the organizations array
+    user.organizations = user.organizations.filter(
+      (org) => org.organizationId !== organizationId
+    );
+
+    // Update user data in the collection
+    await userCollection.updateOne(
+      { _id: new ObjectId(userId) },
+      { $set: { organizations: user.organizations } }
+    );
+
+    // Send success response
+    res.json({ message: "Organization membership removed successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server Error" });
   }
 };
