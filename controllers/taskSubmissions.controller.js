@@ -3,6 +3,9 @@ const client = require("../utils/dbConnect");
 const taskSubmissionCollection = client
   .db("ExperimentLabsInternshipPortal")
   .collection("taskSubmissions");
+const taskCollection = client
+  .db("ExperimentLabsInternshipPortal")
+  .collection("tasks");
 
 module.exports.getSubmissionsByParticipantEmail = async (req, res, next) => {
   const participantEmail = req.params.participantEmail;
@@ -73,6 +76,118 @@ module.exports.updateSubmissionStatus = async (req, res, next) => {
     } else {
       res.status(404).json({ message: "Submission not found" });
     }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// module.exports.generateLeaderBoard = async (req, res, next) => {
+//   try {
+//     // Fetch submissions within the last three months
+//     const threeMonthsAgo = new Date();
+//     threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
+//     const submissionsQuery = {
+//       submissionDateTime: {
+//         $gte: threeMonthsAgo.toISOString(),
+//         $lt: new Date().toISOString(),
+//       },
+//       submissionStatus: "Selected",
+//     };
+
+//     const submissions = await taskSubmissionCollection
+//       .find(submissionsQuery)
+//       .toArray();
+
+//     // Calculate work hours for each participant
+//     const participantWorkHours = {};
+
+//     await Promise.all(
+//       submissions.map(async (submission) => {
+//         const task = await taskCollection.findOne({
+//           _id: new ObjectId(submission?.taskId),
+//         });
+
+//         const taskTime = task ? parseInt(task.taskTime) : 0;
+//         const participantEmail = submission.participantEmail;
+
+//         if (!participantWorkHours[participantEmail]) {
+//           participantWorkHours[participantEmail] = 0;
+//         }
+//         participantWorkHours[participantEmail] += taskTime;
+//       })
+//     );
+
+//     const sortedParticipants = Object.entries(participantWorkHours)
+//       .sort(([, hoursA], [, hoursB]) => hoursB - hoursA)
+//       .map(([email, hours]) => ({ email, hours }));
+
+//     res.status(200).json(sortedParticipants);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Internal server error" });
+//   }
+// };
+
+module.exports.generateLeaderBoard = async (req, res, next) => {
+  try {
+    // Fetch submissions within the last three months
+    const threeMonthsAgo = new Date();
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
+    const submissionsQuery = {
+      submissionDateTime: {
+        $gte: threeMonthsAgo.toISOString(),
+        $lt: new Date().toISOString(),
+      },
+      submissionStatus: "Selected",
+    };
+
+    const submissions = await taskSubmissionCollection
+      .find(submissionsQuery)
+      .toArray();
+
+    // Calculate work hours for each participant
+    const participantWorkHours = {};
+
+    await Promise.all(
+      submissions.map(async (submission) => {
+        const task = await taskCollection.findOne({
+          _id: new ObjectId(submission?.taskId),
+        });
+
+        const taskTime = task ? parseInt(task.taskTime) : 0;
+        const participantEmail = submission.participantEmail;
+
+        if (!participantWorkHours[participantEmail]) {
+          participantWorkHours[participantEmail] = 0;
+        }
+        participantWorkHours[participantEmail] += taskTime;
+      })
+    );
+
+    const sortedParticipants = Object.entries(participantWorkHours)
+      .sort(([, hoursA], [, hoursB]) => hoursB - hoursA)
+      .map(([email, hours]) => ({ email, hours }));
+
+    // Retrieve user information from the 'users' collection
+    const userCollection = client
+      .db("ExperimentLabsInternshipPortal")
+      .collection("users");
+    const usersInfo = await userCollection
+      .find({ email: { $in: sortedParticipants.map((p) => p.email) } })
+      .toArray();
+
+    // Merge user information with sortedParticipants array
+    const finalResult = sortedParticipants.map((participant) => {
+      const userInfo = usersInfo.find(
+        (user) => user.email === participant.email
+      );
+      return { ...participant, ...userInfo };
+    });
+
+    res.status(200).json(finalResult);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
