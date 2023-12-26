@@ -72,3 +72,4 @@ module.exports.getAnOrganization = async (req, res, next) => {
   const result = await orgCollection.findOne({ _id: new ObjectId(orgId) });
   res.send(result);
 };
+

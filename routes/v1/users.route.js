@@ -10,7 +10,7 @@ router
 
 router
   .route("/:id")
-  .get(userControllers.getAnUserById)
+  .get(userControllers.getUserById)
   .patch(userControllers.updateUserById);
 
 router.route("/addMember").put(userControllers.addUserToNewOrganization);
@@ -19,7 +19,7 @@ router
   .route("/usersByOrganization/:organizationId")
   .get(userControllers.getUsersByOrganization);
 
-router.route("/:id").get(userControllers.getUserById);
+// router.route("/:id").get(userControllers.getUserById);
 
 router
   .route("/userId/:userId/organizationId/:organizationId")
