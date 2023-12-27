@@ -3,7 +3,10 @@ const organizationControllers = require("../../controllers/organizations.control
 
 const router = express.Router();
 
-router.route("/").post(organizationControllers.createAnOrganization);
+router
+  .route("/")
+  .post(organizationControllers.createAnOrganization)
+  .get(organizationControllers.getAllOrganizations);
 
 router
   .route("/:id")

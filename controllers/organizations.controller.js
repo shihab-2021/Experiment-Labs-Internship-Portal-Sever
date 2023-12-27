@@ -7,6 +7,11 @@ const userCollection = client
   .db("ExperimentLabsInternshipPortal")
   .collection("users");
 
+module.exports.getAllOrganizations = async (req, res, next) => {
+  const result = await orgCollection.find({}).toArray();
+  res.send(result);
+};
+
 module.exports.createAnOrganization = async (req, res, next) => {
   const org = req.body;
   const result = await orgCollection.insertOne(org);
@@ -72,4 +77,3 @@ module.exports.getAnOrganization = async (req, res, next) => {
   const result = await orgCollection.findOne({ _id: new ObjectId(orgId) });
   res.send(result);
 };
-
