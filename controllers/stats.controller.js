@@ -70,3 +70,26 @@ module.exports.getStatsForStudentSubmission = async (req, res, next) => {
         res.status(500).json({ error: 'Failed to fetch stats' });
     }
 }
+
+
+module.exports.getStatsForCompaniesPostedTask = async (req, res, next) => {
+    try {
+        const taskAggregation = await taskCollection.aggregate([
+            {
+                $group: {
+                    _id: "$creator.organizationId",
+                    totalTasks: { $sum: 1 }
+                }
+            }
+        ]).toArray();
+
+        const organizationDetails = await Promise.all(taskAggregation.map(async (task) => {
+            const organization = await orgCollection.findOne({ _id: new ObjectId(task._id) });
+            return { ...task, organization };
+        }));
+
+        res.json(organizationDetails);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch total tasks by organization' });
+    }
+}
