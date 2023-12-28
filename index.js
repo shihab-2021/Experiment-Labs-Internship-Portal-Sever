@@ -12,6 +12,7 @@ const messageRoutes = require("./routes/v1/messages.route");
 const organizationRoutes = require("./routes/v1/organizations.route");
 const taskRoutes = require("./routes/v1/tasks.route");
 const taskSubmissionRoutes = require("./routes/v1/taskSubmissions.route");
+const statRoutes = require("./routes/v1/stats.route");
 
 app.get("/", (req, res) => {
   res.send("Hello world");
@@ -47,6 +48,9 @@ app.use("/api/v1/taskSubmissions", taskSubmissionRoutes);
 
 // For upload file
 app.use("/api/v1/uploadFile", uploadFileRoutes);
+
+//For stats
+app.use("/api/v1/stats", statRoutes);
 
 app.get("/", (req, res) => {
   res.send("Experiment Labs server is running");
