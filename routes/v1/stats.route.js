@@ -18,4 +18,9 @@ router
     .get(statControllers.getStatsForCompaniesPostedTask);
 
 
+    router
+    .route("/studentSubmissionTable")
+    .get(statControllers.getStatsForStudentSubmissionTable);
+
+
 module.exports = router;
