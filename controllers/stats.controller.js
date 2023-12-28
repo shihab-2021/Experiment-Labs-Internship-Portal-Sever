@@ -3,6 +3,7 @@ const client = require("../utils/dbConnect");
 const orgCollection = client.db("ExperimentLabsInternshipPortal").collection("organizations");
 const taskCollection = client.db("ExperimentLabsInternshipPortal").collection("tasks");
 const taskSubmissionCollection = client.db("ExperimentLabsInternshipPortal").collection("taskSubmissions");
+const userCollection = client.db("ExperimentLabsInternshipPortal").collection("users");
 
 module.exports.getStatsForCompaniesTask = async (req, res, next) => {
     try {
@@ -89,6 +90,24 @@ module.exports.getStatsForCompaniesPostedTask = async (req, res, next) => {
         }));
 
         res.json(organizationDetails);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch total tasks by organization' });
+    }
+}
+
+
+module.exports.getStatsForStudentSubmissionTable = async (req, res, next) => {
+    try {
+        const taskAggregation = await taskSubmissionCollection.find({}).toArray();
+
+        const submissionDetails = await Promise.all(taskAggregation.map(async (task) => {
+            const organization = await orgCollection.findOne({ _id: new ObjectId(task.organizationId) });
+            const taskData = await taskCollection.findOne({ _id: new ObjectId(task.taskId) });
+            const userData = await userCollection.findOne({email: task.participantEmail})
+            return { ...task, userData, organization, taskData };
+        }));
+
+        res.json(submissionDetails);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch total tasks by organization' });
     }
