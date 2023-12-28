@@ -42,17 +42,14 @@ module.exports.getStatsForCompaniesTask = async (req, res, next) => {
 
 module.exports.getStatsForStudentSubmission = async (req, res, next) => {
     try {
-        // Fetch total companies count from orgCollection
-        const totalCompanies = await orgCollection.countDocuments();
-
         // Fetch total task posts count from taskCollection
-        const totalTaskPosts = await taskCollection.countDocuments();
+        const totalSubmission = await taskSubmissionCollection.countDocuments();
 
         // Aggregate submissionStatus counts
-        const submissionStatusCounts = await taskCollection.aggregate([
+        const submissionStatusCounts = await taskSubmissionCollection.aggregate([
             {
                 $group: {
-                    _id: "$taskStatus",
+                    _id: "$submissionStatus",
                     count: { $sum: 1 }
                 }
             }
@@ -60,8 +57,7 @@ module.exports.getStatsForStudentSubmission = async (req, res, next) => {
 
         // Convert the aggregation output to a more structured format
         const stats = {
-            totalCompanies,
-            totalTaskPosts
+            totalSubmission
         };
 
         // Adding submissionStatus counts to the stats object
