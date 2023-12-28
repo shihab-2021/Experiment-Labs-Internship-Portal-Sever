@@ -22,6 +22,11 @@ module.exports.getSubmissionsByParticipantEmail = async (req, res, next) => {
   }
 };
 
+module.exports.getAllTaskSubmissions = async (req, res, next) => {
+  const result = await taskSubmissionCollection.find({}).toArray();
+  res.send(result);
+};
+
 module.exports.getATaskSubmissionById = async (req, res, next) => {
   const { submissionId } = req.params;
   const query = { _id: new ObjectId(submissionId) };
