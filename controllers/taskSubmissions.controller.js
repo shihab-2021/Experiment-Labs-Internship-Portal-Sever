@@ -67,10 +67,16 @@ module.exports.getTaskSubmissionsBySubmissionStatus = async (
 
 module.exports.updateSubmissionStatus = async (req, res, next) => {
   const { submissionId, submissionStatus } = req.params;
+  const { suggestion, comment } = req.body;
 
   try {
     const query = { _id: ObjectId(submissionId) };
     const update = { $set: { submissionStatus } };
+
+    if (submissionStatus === "Rejected" && (suggestion || comment)) {
+      update.$set.suggestion = suggestion;
+      update.$set.comment = comment;
+    }
 
     const result = await taskSubmissionCollection.updateOne(query, update);
 
