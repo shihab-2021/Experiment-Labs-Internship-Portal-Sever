@@ -10,7 +10,7 @@ router
 
 router
   .route("/:id")
-  .get(organizationControllers.getAnOrganization)
+  // .get(organizationControllers.getAnOrganization)
   .put(organizationControllers.updateAnOrganization);
 
 module.exports = router;
