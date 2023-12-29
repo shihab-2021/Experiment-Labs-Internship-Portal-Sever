@@ -1,6 +1,8 @@
 const { ObjectId } = require("mongodb");
 const client = require("../utils/dbConnect");
 const chatCollection = client.db('ExperimentLabsInternshipPortal').collection('chats');
+const orgCollection = client.db("ExperimentLabsInternshipPortal").collection("organizations");
+const userCollection = client.db("ExperimentLabsInternshipPortal").collection("users");
 
 module.exports.createChat = async (req, res, next) => {
 
@@ -9,7 +11,7 @@ module.exports.createChat = async (req, res, next) => {
         const existingChat = await chatCollection.findOne({ 'users._id': { $all: chatData.users.map(user => user._id) } });
 
         if (existingChat) {
-            return res.status(400).json({
+            return res.status(201).json({
                 success: true,
                 error: 'Chat between these users already exists'
             });
@@ -47,6 +49,36 @@ module.exports.getChatByUserId = async (req, res, next) => {
             success: false,
             error: 'Failed to fetch chats'
         });
+    }
+}
+
+
+module.exports.getAllChatsWithUserInfo = async (req, res) => {
+    try {
+        const chats = await chatCollection.find({}).toArray();
+
+        const chatsWithUserInfo = await Promise.all(
+            chats.map(async (chat) => {
+                const usersWithOrgInfo = await Promise.all(
+                    chat.users.map(async (user) => {
+                        const userInfo = await userCollection.findOne({ _id: new ObjectId(user._id) });
+                        let organizationInfo = {};
+
+                        if (userInfo && userInfo.organizations && userInfo.organizations.length > 0) {
+                            const organizationId = userInfo.organizations[0].organizationId;
+                            organizationInfo = await orgCollection.findOne({ _id: new ObjectId(organizationId) });
+                        }
+                        return { ...userInfo, organizationInfo };
+                    })
+                );
+
+                return { ...chat, users: usersWithOrgInfo };
+            })
+        );
+
+        res.json(chatsWithUserInfo);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch chats with user and organization info' });
     }
 }
 

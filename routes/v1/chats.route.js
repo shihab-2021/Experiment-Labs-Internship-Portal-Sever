@@ -5,6 +5,7 @@ const router = express.Router();
 
 router
   .route("/")
+  .get(chatControllers.getAllChatsWithUserInfo)
   .post(chatControllers.createChat);
 
 router
