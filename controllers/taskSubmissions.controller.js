@@ -6,6 +6,9 @@ const taskSubmissionCollection = client
 const taskCollection = client
   .db("ExperimentLabsInternshipPortal")
   .collection("tasks");
+const userCollection = client
+  .db("ExperimentLabsInternshipPortal")
+  .collection("users");
 
 module.exports.getSubmissionsByParticipantEmail = async (req, res, next) => {
   const participantEmail = req.params.participantEmail;
