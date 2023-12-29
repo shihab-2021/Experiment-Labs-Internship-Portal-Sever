@@ -101,6 +101,8 @@ module.exports.addUserToNewOrganization = async (req, res, next) => {
   }
 };
 
+
+
 module.exports.getUsersByOrganization = async (req, res, next) => {
   const { organizationId } = req.params;
 
@@ -119,6 +121,7 @@ module.exports.getUsersByOrganization = async (req, res, next) => {
   }
 };
 
+
 module.exports.getUserById = async (req, res, next) => {
   try {
     const id = req.params.id;
@@ -136,6 +139,7 @@ module.exports.getUserById = async (req, res, next) => {
     });
   }
 };
+
 
 module.exports.removeMemberFromOrganization = async (req, res) => {
   const { userId, organizationId } = req.params;
@@ -167,3 +171,6 @@ module.exports.removeMemberFromOrganization = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+
+
+
