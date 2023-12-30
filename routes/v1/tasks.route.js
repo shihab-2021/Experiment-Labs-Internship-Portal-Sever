@@ -27,4 +27,8 @@ router.route("/applyTask/:taskId").put(tasksControllers.applyForTask);
 
 router.route("/submitTask").post(tasksControllers.submitATask);
 
+router
+  .route("/organizationId/:organizationId/creatorEmail/:creatorEmail")
+  .get(tasksControllers.getTasksByOrganizationAndCreator);
+
 module.exports = router;
