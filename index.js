@@ -13,6 +13,7 @@ const organizationRoutes = require("./routes/v1/organizations.route");
 const taskRoutes = require("./routes/v1/tasks.route");
 const taskSubmissionRoutes = require("./routes/v1/taskSubmissions.route");
 const statRoutes = require("./routes/v1/stats.route");
+const categoryRoutes = require("./routes/v1/categories.route");
 
 app.get("/", (req, res) => {
   res.send("Hello world");
@@ -46,6 +47,9 @@ app.use("/api/v1/tasks", taskRoutes);
 // For tasks submissions
 app.use("/api/v1/taskSubmissions", taskSubmissionRoutes);
 
+// For tasks submissions
+app.use("/api/v1/categories", categoryRoutes);
+
 // For upload file
 app.use("/api/v1/uploadFile", uploadFileRoutes);
 
@@ -64,11 +68,10 @@ const server = app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
 
-
 const io = require("socket.io")(server, {
   // pingTimeout: 60000,
   cors: {
-    origin: process.env.Origin
+    origin: process.env.Origin,
   },
 });
 
@@ -101,7 +104,6 @@ io.on("connection", (socket) => {
     socket.leave(userData._id);
   });
 });
-
 
 // process.on("unhandledRejection", (error) => {
 //   console.log(error.name, error.message);
