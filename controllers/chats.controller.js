@@ -38,11 +38,36 @@ module.exports.createChat = async (req, res, next) => {
 module.exports.getChatByUserId = async (req, res, next) => {
     try {
         const userId = req.params.userId;
-        const userChats = await chatCollection.find({ 'users._id': userId }).toArray();
+        const chats = await chatCollection.find({ 'users._id': userId }).toArray();
+
+        const chatsWithUserInfo = await Promise.all(
+            chats.map(async (chat) => {
+                const usersWithOrgInfo = await Promise.all(
+                    chat.users.map(async (user) => {
+                        const userInfo = await userCollection.findOne({ _id: new ObjectId(user._id) });
+                        let organizationInfo = {};
+
+                        if (userInfo && userInfo.organizations && userInfo.organizations.length > 0) {
+                            const organizationId = userInfo.organizations[0].organizationId;
+                            organizationInfo = await orgCollection.findOne({ _id: new ObjectId(organizationId) });
+                        }
+                        return { ...userInfo, organizationInfo };
+                    })
+                );
+
+                const latestMessage = { ...chat.latestMessage };
+                if (latestMessage.senderId) {
+                    const senderUserInfo = await userCollection.findOne({ _id: new ObjectId(latestMessage.senderId) });
+                    latestMessage.senderInfo = senderUserInfo ? senderUserInfo : {};
+                }
+
+                return { ...chat, users: usersWithOrgInfo, latestMessage };
+            })
+        );
 
         res.status(200).send({
             success: true,
-            userChats
+            userChats: chatsWithUserInfo
         });
     } catch (error) {
         res.status(500).json({
@@ -72,11 +97,20 @@ module.exports.getAllChatsWithUserInfo = async (req, res) => {
                     })
                 );
 
-                return { ...chat, users: usersWithOrgInfo };
+                const latestMessage = { ...chat.latestMessage };
+                if (latestMessage.senderId) {
+                    const senderUserInfo = await userCollection.findOne({ _id: new ObjectId(latestMessage.senderId) });
+                    latestMessage.senderInfo = senderUserInfo ? senderUserInfo : {};
+                }
+
+                return { ...chat, users: usersWithOrgInfo, latestMessage };
             })
         );
 
-        res.json(chatsWithUserInfo);
+        res.status(200).send({
+            success: true,
+            userChats: chatsWithUserInfo
+        });
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch chats with user and organization info' });
     }
