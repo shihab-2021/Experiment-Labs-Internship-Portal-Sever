@@ -182,3 +182,29 @@ module.exports.submitATask = async (req, res, next) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+module.exports.updateTaskStatus = async (req, res, next) => {
+  const { taskId, taskStatus } = req.params;
+  const newData = req.body;
+
+  try {
+    const query = { _id: ObjectId(taskId) };
+    const update = { $set: { taskStatus }, $addToSet: {} };
+
+    // Add new data from the request body to the task
+    for (const key in newData) {
+      update.$set[key] = newData[key];
+    }
+
+    const result = await taskCollection.updateOne(query, update);
+
+    if (result.modifiedCount > 0) {
+      res.status(200).json({ message: "Task updated successfully" });
+    } else {
+      res.status(404).json({ message: "Task not found" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
