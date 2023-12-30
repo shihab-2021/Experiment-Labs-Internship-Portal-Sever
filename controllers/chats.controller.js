@@ -12,8 +12,9 @@ module.exports.createChat = async (req, res, next) => {
 
         if (existingChat) {
             return res.status(201).json({
+                chatId: existingChat._id,
                 success: true,
-                error: 'Chat between these users already exists'
+                message: 'Chat between these users already exists'
             });
         }
 
@@ -22,6 +23,7 @@ module.exports.createChat = async (req, res, next) => {
         res.status(201).json({
             success: true,
             message: 'Chat created successfully',
+            chatId: result.insertedId,
             result
         });
 
