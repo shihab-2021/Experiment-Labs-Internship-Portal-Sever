@@ -23,6 +23,10 @@ router
 
 router.route("/taskStatus/:taskStatus").get(tasksControllers.getTasksByStatus);
 
+router
+  .route("/creatorEmail/:creatorEmail")
+  .get(tasksControllers.getTasksByCreatorEmail);
+
 router.route("/applyTask/:taskId").put(tasksControllers.applyForTask);
 
 router.route("/submitTask").post(tasksControllers.submitATask);
