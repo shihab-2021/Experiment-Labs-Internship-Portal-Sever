@@ -230,3 +230,24 @@ module.exports.getTasksByOrganizationAndCreator = async (req, res, next) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+module.exports.getTasksByCreatorEmail = async (req, res, next) => {
+  const { creatorEmail } = req.params;
+
+  try {
+    const query = {
+      "creator.email": creatorEmail,
+    };
+
+    const tasks = await taskCollection.find(query).toArray();
+
+    if (tasks.length > 0) {
+      res.status(200).json(tasks);
+    } else {
+      res.status(404).json({ message: "No tasks found" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
