@@ -103,12 +103,47 @@ module.exports.getStatsForStudentSubmissionTable = async (req, res, next) => {
         const submissionDetails = await Promise.all(taskAggregation.map(async (task) => {
             const organization = await orgCollection.findOne({ _id: new ObjectId(task.organizationId) });
             const taskData = await taskCollection.findOne({ _id: new ObjectId(task.taskId) });
-            const userData = await userCollection.findOne({email: task.participantEmail})
+            const userData = await userCollection.findOne({ email: task.participantEmail })
             return { ...task, userData, organization, taskData };
         }));
 
         res.json(submissionDetails);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch total tasks by organization' });
+    }
+}
+
+
+
+module.exports.getStatsOrganizationTaskCategory = async (req, res, next) => {
+    try {
+        const organizationId = req.params.organizationId;
+        console.log(organizationId);
+        const submissionStatusCounts = await taskCollection.aggregate([
+            {
+                $match: { "creator.organizationId": organizationId } // Filter by the specific organization ID
+            },
+            {
+                $group: {
+                    _id: "$taskCategory",
+                    count: { $sum: 1 }
+                }
+            }
+        ]).toArray();
+
+        // console.log(submissionStatusCounts);
+
+        // Convert the aggregation output to a more structured format
+        const stats = {
+        };
+
+        // Adding submissionStatus counts to the stats object
+        submissionStatusCounts.forEach((status) => {
+            stats[status._id] = status.count;
+        });
+
+        res.status(200).json(stats);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch stats' });
     }
 }
