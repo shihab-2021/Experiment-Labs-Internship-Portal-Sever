@@ -25,4 +25,10 @@ router
   .route("/userId/:userId/organizationId/:organizationId")
   .put(userControllers.removeMemberFromOrganization);
 
+
+router
+  .route("/bulk")
+  .post(userControllers.addBulkUsers);
+
+
 module.exports = router;
