@@ -4,8 +4,8 @@ const userCollection = client
   .db("ExperimentLabsInternshipPortal")
   .collection("users");
 
-const firebaseUtils = require('../utils/firebaseSignUp');
-const passwordUtils = require('../utils/generatePassword');
+// const firebaseUtils = require("../utils/firebaseSignUp");
+// const passwordUtils = require("../utils/generatePassword");
 
 module.exports.getAnUserByEmail = async (req, res, next) => {
   const email = req.query.email;
@@ -104,8 +104,6 @@ module.exports.addUserToNewOrganization = async (req, res, next) => {
   }
 };
 
-
-
 module.exports.getUsersByOrganization = async (req, res, next) => {
   const { organizationId } = req.params;
 
@@ -124,7 +122,6 @@ module.exports.getUsersByOrganization = async (req, res, next) => {
   }
 };
 
-
 module.exports.getUserById = async (req, res, next) => {
   try {
     const id = req.params.id;
@@ -142,7 +139,6 @@ module.exports.getUserById = async (req, res, next) => {
     });
   }
 };
-
 
 module.exports.removeMemberFromOrganization = async (req, res) => {
   const { userId, organizationId } = req.params;
@@ -175,30 +171,28 @@ module.exports.removeMemberFromOrganization = async (req, res) => {
   }
 };
 
+// module.exports.addBulkUsers = async (req, res) => {
+//   const users = req.body;
 
+//   try {
+//     // Add users to Firebase using the function
+//     for (const user of users) {
+//       const password = passwordUtils.generateCustomPassword(user);
+//       console.log(password);
+//       user.password = password;
+//       const result = await firebaseUtils.createUserWithEmailAndPassword(user.email, password);
+//       if (!result.success) {
+//         console.error(`Failed to create user in Firebase for email: ${user.email}`);
+//         // Handle error case: Maybe remove the user from MongoDB?
+//       }
+//     }
 
-module.exports.addBulkUsers = async (req, res) => {
-  const users = req.body;
+//     const insertedUsers = await userCollection.insertMany(users);
+//     const count = await userCollection.countDocuments();
 
-  try {
-    // Add users to Firebase using the function
-    for (const user of users) {
-      const password = passwordUtils.generateCustomPassword(user);
-      console.log(password);
-      user.password = password;
-      const result = await firebaseUtils.createUserWithEmailAndPassword(user.email, password);
-      if (!result.success) {
-        console.error(`Failed to create user in Firebase for email: ${user.email}`);
-        // Handle error case: Maybe remove the user from MongoDB?
-      }
-    }
-
-    const insertedUsers = await userCollection.insertMany(users);
-    const count = await userCollection.countDocuments();
-
-    res.status(200).json({ message: 'Users added to MongoDB and Firebase successfully', insertedUsers, count });
-  } catch (error) {
-    console.error('Error adding users:', error);
-    res.status(500).json({ message: 'Error adding users', error: error.message });
-  }
-}
+//     res.status(200).json({ message: 'Users added to MongoDB and Firebase successfully', insertedUsers, count });
+//   } catch (error) {
+//     console.error('Error adding users:', error);
+//     res.status(500).json({ message: 'Error adding users', error: error.message });
+//   }
+// }
