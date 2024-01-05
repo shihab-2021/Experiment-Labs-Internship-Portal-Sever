@@ -4,8 +4,10 @@ const userCollection = client
   .db("ExperimentLabsInternshipPortal")
   .collection("users");
 
-// const firebaseUtils = require("../utils/firebaseSignUp");
-// const passwordUtils = require("../utils/generatePassword");
+
+// const firebaseUtils = require('../utils/firebaseSignUp');
+// const passwordUtils = require('../utils/generatePassword');
+
 
 module.exports.getAnUserByEmail = async (req, res, next) => {
   const email = req.query.email;
@@ -170,6 +172,7 @@ module.exports.removeMemberFromOrganization = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+
 
 // module.exports.addBulkUsers = async (req, res) => {
 //   const users = req.body;

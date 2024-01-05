@@ -25,10 +25,12 @@ module.exports.getSubmissionsByParticipantEmail = async (req, res, next) => {
   }
 };
 
+
 module.exports.getAllTaskSubmissions = async (req, res, next) => {
   const result = await taskSubmissionCollection.find({}).toArray();
   res.send(result);
 };
+
 
 module.exports.getATaskSubmissionById = async (req, res, next) => {
   const { submissionId } = req.params;
@@ -37,11 +39,8 @@ module.exports.getATaskSubmissionById = async (req, res, next) => {
   res.send(user);
 };
 
-module.exports.getTaskSubmissionsBySubmissionStatus = async (
-  req,
-  res,
-  next
-) => {
+
+module.exports.getTaskSubmissionsBySubmissionStatus = async (req, res, next) => {
   try {
     const { submissionStatus } = req.params;
     const threeMonthsAgo = new Date();
@@ -67,6 +66,7 @@ module.exports.getTaskSubmissionsBySubmissionStatus = async (
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 module.exports.updateSubmissionStatus = async (req, res, next) => {
   const { submissionId, submissionStatus } = req.params;
@@ -95,6 +95,7 @@ module.exports.updateSubmissionStatus = async (req, res, next) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 module.exports.generateLeaderBoard = async (req, res, next) => {
   try {
@@ -159,3 +160,36 @@ module.exports.generateLeaderBoard = async (req, res, next) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+
+
+module.exports.studentTasksByCounsellor = async (req, res, next) => {
+
+  try {
+    const { counsellorId } = req.params; // Extract the counsellorId from the request params
+
+    // Find all users with the given counsellorId
+    const users = await userCollection.find({ counsellorId }).toArray();
+
+    // For each user, find their task submissions using the email
+    const taskSubmissions = await Promise.all(
+      users.map(async (user) => {
+        const { email } = user;
+
+        // Find task submissions for the user using their email
+        const userTaskSubmissions = await taskSubmissionCollection.find({ participantEmail: email }).toArray();
+
+        return {
+          user,
+          taskSubmissions: userTaskSubmissions
+        };
+      })
+    );
+
+    res.json(taskSubmissions);
+
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch task submissions for users' });
+  }
+
+}

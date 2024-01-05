@@ -23,4 +23,9 @@ router
   .route("/:submissionId")
   .get(taskSubmissionsController.getATaskSubmissionById);
 
+
+router
+  .route("/counsellorId/:counsellorId")
+  .get(taskSubmissionsController.studentTasksByCounsellor);
+
 module.exports = router;
