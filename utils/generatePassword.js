@@ -16,8 +16,6 @@
 //     const password = `${formattedFirstName}_${lastFourDigits}`;
 //     return password;
 // };
-
-
 // module.exports = {
 //     generateCustomPassword,
 // };
