@@ -92,7 +92,7 @@ module.exports.applyForTask = async (req, res, next) => {
       organizationId: organizationId,
       submissionDateTime: "",
       applyDateTime: applyDateTime,
-      submissionStatus: "Processing",
+      submissionStatus: "Pending",
     });
 
     // Add participant application to the task
