@@ -195,3 +195,39 @@ module.exports.studentTasksByCounsellor = async (req, res, next) => {
   }
 
 }
+
+
+
+module.exports.getCounsellorStats = async (req, res) => {
+  try {
+      const { counsellorId } = req.params;
+
+      // 1. Get all users with the specified counsellorId
+      const users = await userCollection.find({ counsellorId }).toArray();
+      const userEmails = users.map(user => user.email);
+
+      // 2. Total Students (count of users)
+      const totalStudents = users.length;
+
+      // 3. Total Schools (count of distinct schools associated with the users)
+      const schools = await schoolCollection.countDocuments({ counsellorId });
+
+      // 4. Fetch all task submissions by participant email
+      const taskSubmissions = await taskSubmissionCollection.find({ participantEmail: { $in: userEmails } }).toArray();
+
+      // 5. Total Companies (distinct organizationIds from task submissions)
+      const totalCompanies = new Set(taskSubmissions.map(submission => submission.organizationId)).size;
+
+      // 6. Total Tasks (distinct taskIds from task submissions)
+      const totalTasks = new Set(taskSubmissions.map(submission => submission.taskId)).size;
+
+      res.json({
+          totalStudents,
+          totalSchools: schools,
+          totalCompanies,
+          totalTasks
+      });
+  } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch counsellor statistics' });
+  }
+}
