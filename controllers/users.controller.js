@@ -3,9 +3,10 @@ const client = require("../utils/dbConnect");
 const userCollection = client
   .db("ExperimentLabsInternshipPortal")
   .collection("users");
+  
+// const firebaseUtils = require("../utils/firebaseSignUp");
+// const passwordUtils = require("../utils/generatePassword");
 
-// const firebaseUtils = require('../utils/firebaseSignUp');
-// const passwordUtils = require('../utils/generatePassword');
 
 module.exports.getAnUserByEmail = async (req, res, next) => {
   const email = req.query.email;
