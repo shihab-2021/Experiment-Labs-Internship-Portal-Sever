@@ -6,9 +6,8 @@ const taskSubmissionCollection = client
 const taskCollection = client
   .db("ExperimentLabsInternshipPortal")
   .collection("tasks");
-const userCollection = client
-  .db("ExperimentLabsInternshipPortal")
-  .collection("users");
+const userCollection = client.db("ExperimentLabsInternshipPortal").collection("users");
+const schoolCollection = client.db("ExperimentLabsInternshipPortal").collection("schools");
 
 module.exports.getSubmissionsByParticipantEmail = async (req, res, next) => {
   const participantEmail = req.params.participantEmail;
@@ -175,12 +174,15 @@ module.exports.studentTasksByCounsellor = async (req, res, next) => {
     const taskSubmissions = await Promise.all(
       users.map(async (user) => {
         const { email } = user;
+        const { schoolId } = user;
 
         // Find task submissions for the user using their email
         const userTaskSubmissions = await taskSubmissionCollection.find({ participantEmail: email }).toArray();
+        const schoolData = await schoolCollection.findOne({ _id: new ObjectId(schoolId) });
 
         return {
           user,
+          schoolData,
           taskSubmissions: userTaskSubmissions
         };
       })
