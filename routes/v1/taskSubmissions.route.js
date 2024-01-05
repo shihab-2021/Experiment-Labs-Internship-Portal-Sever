@@ -28,4 +28,9 @@ router
   .route("/counsellorId/:counsellorId")
   .get(taskSubmissionsController.studentTasksByCounsellor);
 
+
+router
+  .route("/getCounsellorStats/counsellorId/:counsellorId")
+  .get(taskSubmissionsController.getCounsellorStats);
+
 module.exports = router;
