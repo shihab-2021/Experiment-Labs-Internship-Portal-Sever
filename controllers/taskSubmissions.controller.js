@@ -8,6 +8,7 @@ const taskCollection = client
   .collection("tasks");
 const userCollection = client.db("ExperimentLabsInternshipPortal").collection("users");
 const schoolCollection = client.db("ExperimentLabsInternshipPortal").collection("schools");
+const orgCollection = client.db("ExperimentLabsInternshipPortal").collection("organizations");
 
 module.exports.getSubmissionsByParticipantEmail = async (req, res, next) => {
   const participantEmail = req.params.participantEmail;
@@ -200,34 +201,77 @@ module.exports.studentTasksByCounsellor = async (req, res, next) => {
 
 module.exports.getCounsellorStats = async (req, res) => {
   try {
-      const { counsellorId } = req.params;
+    const { counsellorId } = req.params;
 
-      // 1. Get all users with the specified counsellorId
-      const users = await userCollection.find({ counsellorId }).toArray();
-      const userEmails = users.map(user => user.email);
+    // 1. Get all users with the specified counsellorId
+    const users = await userCollection.find({ counsellorId }).toArray();
+    const userEmails = users.map(user => user.email);
 
-      // 2. Total Students (count of users)
-      const totalStudents = users.length;
+    // 2. Total Students (count of users)
+    const totalStudents = users.length;
 
-      // 3. Total Schools (count of distinct schools associated with the users)
-      const schools = await schoolCollection.countDocuments({ counsellorId });
+    // 3. Total Schools (count of distinct schools associated with the users)
+    const schools = await schoolCollection.countDocuments({ counsellorId });
 
-      // 4. Fetch all task submissions by participant email
-      const taskSubmissions = await taskSubmissionCollection.find({ participantEmail: { $in: userEmails } }).toArray();
+    // 4. Fetch all task submissions by participant email
+    const taskSubmissions = await taskSubmissionCollection.find({ participantEmail: { $in: userEmails } }).toArray();
 
-      // 5. Total Companies (distinct organizationIds from task submissions)
-      const totalCompanies = new Set(taskSubmissions.map(submission => submission.organizationId)).size;
+    // 5. Total Companies (distinct organizationIds from task submissions)
+    const totalCompanies = new Set(taskSubmissions.map(submission => submission.organizationId)).size;
 
-      // 6. Total Tasks (distinct taskIds from task submissions)
-      const totalTasks = new Set(taskSubmissions.map(submission => submission.taskId)).size;
+    // 6. Total Tasks (distinct taskIds from task submissions)
+    const totalTasks = new Set(taskSubmissions.map(submission => submission.taskId)).size;
 
-      res.json({
-          totalStudents,
-          totalSchools: schools,
-          totalCompanies,
-          totalTasks
-      });
+    res.json({
+      totalStudents,
+      totalSchools: schools,
+      totalCompanies,
+      totalTasks
+    });
   } catch (error) {
-      res.status(500).json({ error: 'Failed to fetch counsellor statistics' });
+    res.status(500).json({ error: 'Failed to fetch counsellor statistics' });
   }
 }
+
+
+module.exports.getSchoolsWithTasksAndOrganizations = async (req, res) => {
+  const { counsellorId } = req.params;
+
+  try {
+    // Fetch schools under the same counsellorId
+    const schools = await schoolCollection.find({ counsellorId }).toArray();
+
+    const schoolsWithDetails = await Promise.all(
+      schools.map(async school => {
+        // Find users under the school
+        const users = await userCollection.find({ schoolId: school._id.toString() }).toArray();
+        const userEmails = users.map(user => user.email);
+
+        // Find task submissions by participant emails
+        const taskSubmissions = await taskSubmissionCollection
+          .find({ participantEmail: { $in: userEmails } })
+          .toArray();
+
+        // Extract taskIds and organizationIds from task submissions
+        const taskIds = taskSubmissions.map(submission => submission.taskId.toString());
+        const organizationIds = taskSubmissions.map(submission => submission.organizationId.toString());
+
+        // Find tasks and organizations using extracted IDs
+        const tasks = await taskCollection.find({ _id: { $in: taskIds.map(id => new ObjectId(id)) } }).toArray();
+        const organizations = await orgCollection.find({ _id: { $in: organizationIds.map(id => new ObjectId(id)) } }).toArray();
+
+        return {
+          school,
+          tasks,
+          organizations
+        };
+      })
+    );
+
+    res.json(schoolsWithDetails);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch schools with tasks and organizations' });
+  }
+};
+
+
