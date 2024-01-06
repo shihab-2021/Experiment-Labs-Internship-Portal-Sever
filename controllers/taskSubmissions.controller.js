@@ -6,9 +6,15 @@ const taskSubmissionCollection = client
 const taskCollection = client
   .db("ExperimentLabsInternshipPortal")
   .collection("tasks");
-const userCollection = client.db("ExperimentLabsInternshipPortal").collection("users");
-const schoolCollection = client.db("ExperimentLabsInternshipPortal").collection("schools");
-const orgCollection = client.db("ExperimentLabsInternshipPortal").collection("organizations");
+const userCollection = client
+  .db("ExperimentLabsInternshipPortal")
+  .collection("users");
+const schoolCollection = client
+  .db("ExperimentLabsInternshipPortal")
+  .collection("schools");
+const orgCollection = client
+  .db("ExperimentLabsInternshipPortal")
+  .collection("organizations");
 
 module.exports.getSubmissionsByParticipantEmail = async (req, res, next) => {
   const participantEmail = req.params.participantEmail;
@@ -25,12 +31,10 @@ module.exports.getSubmissionsByParticipantEmail = async (req, res, next) => {
   }
 };
 
-
 module.exports.getAllTaskSubmissions = async (req, res, next) => {
   const result = await taskSubmissionCollection.find({}).toArray();
   res.send(result);
 };
-
 
 module.exports.getATaskSubmissionById = async (req, res, next) => {
   const { submissionId } = req.params;
@@ -39,8 +43,11 @@ module.exports.getATaskSubmissionById = async (req, res, next) => {
   res.send(user);
 };
 
-
-module.exports.getTaskSubmissionsBySubmissionStatus = async (req, res, next) => {
+module.exports.getTaskSubmissionsBySubmissionStatus = async (
+  req,
+  res,
+  next
+) => {
   try {
     const { submissionStatus } = req.params;
     const threeMonthsAgo = new Date();
@@ -66,7 +73,6 @@ module.exports.getTaskSubmissionsBySubmissionStatus = async (req, res, next) => 
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 module.exports.updateSubmissionStatus = async (req, res, next) => {
   const { submissionId, submissionStatus } = req.params;
@@ -95,7 +101,6 @@ module.exports.updateSubmissionStatus = async (req, res, next) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 module.exports.generateLeaderBoard = async (req, res, next) => {
   try {
@@ -138,10 +143,6 @@ module.exports.generateLeaderBoard = async (req, res, next) => {
       .sort(([, hoursA], [, hoursB]) => hoursB - hoursA)
       .map(([email, hours]) => ({ email, hours }));
 
-    // Retrieve user information from the 'users' collection
-    const userCollection = client
-      .db("ExperimentLabsInternshipPortal")
-      .collection("users");
     const usersInfo = await userCollection
       .find({ email: { $in: sortedParticipants.map((p) => p.email) } })
       .toArray();
@@ -161,10 +162,70 @@ module.exports.generateLeaderBoard = async (req, res, next) => {
   }
 };
 
+module.exports.generateCounsellorLeaderBoard = async (req, res, next) => {
+  const { counsellorId } = req.params;
 
+  try {
+    // Fetch submissions for students under the given counsellor within the last three months
+    const threeMonthsAgo = new Date();
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
+    const submissionsQuery = {
+      counsellorId,
+      submissionDateTime: {
+        $gte: threeMonthsAgo.toISOString(),
+        $lt: new Date().toISOString(),
+      },
+      submissionStatus: "Selected",
+    };
+
+    const submissions = await taskSubmissionCollection
+      .find(submissionsQuery)
+      .toArray();
+
+    // Calculate work hours for each student
+    const studentWorkHours = {};
+
+    await Promise.all(
+      submissions.map(async (submission) => {
+        const task = await taskCollection.findOne({
+          _id: new ObjectId(submission?.taskId),
+        });
+
+        const taskTime = task ? parseInt(task.taskTime) : 0;
+        const participantEmail = submission.participantEmail;
+
+        if (!studentWorkHours[participantEmail]) {
+          studentWorkHours[participantEmail] = 0;
+        }
+        studentWorkHours[participantEmail] += taskTime;
+      })
+    );
+
+    const sortedParticipants = Object.entries(studentWorkHours)
+      .sort(([, hoursA], [, hoursB]) => hoursB - hoursA)
+      .map(([email, hours]) => ({ email, hours }));
+
+    const usersInfo = await userCollection
+      .find({ email: { $in: sortedParticipants.map((p) => p.email) } })
+      .toArray();
+
+    // Merge user information with sortedParticipants array
+    const finalResult = sortedParticipants.map((participant) => {
+      const userInfo = usersInfo.find(
+        (user) => user.email === participant.email
+      );
+      return { ...participant, ...userInfo };
+    });
+
+    res.status(200).json(finalResult);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 module.exports.studentTasksByCounsellor = async (req, res, next) => {
-
   try {
     const { counsellorId } = req.params; // Extract the counsellorId from the request params
 
@@ -178,26 +239,28 @@ module.exports.studentTasksByCounsellor = async (req, res, next) => {
         const { schoolId } = user;
 
         // Find task submissions for the user using their email
-        const userTaskSubmissions = await taskSubmissionCollection.find({ participantEmail: email }).toArray();
-        const schoolData = await schoolCollection.findOne({ _id: new ObjectId(schoolId) });
+        const userTaskSubmissions = await taskSubmissionCollection
+          .find({ participantEmail: email })
+          .toArray();
+        const schoolData = await schoolCollection.findOne({
+          _id: new ObjectId(schoolId),
+        });
 
         return {
           user,
           schoolData,
-          taskSubmissions: userTaskSubmissions
+          taskSubmissions: userTaskSubmissions,
         };
       })
     );
 
     res.json(taskSubmissions);
-
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch task submissions for users' });
+    res
+      .status(500)
+      .json({ error: "Failed to fetch task submissions for users" });
   }
-
-}
-
-
+};
 
 module.exports.getCounsellorStats = async (req, res) => {
   try {
@@ -205,7 +268,7 @@ module.exports.getCounsellorStats = async (req, res) => {
 
     // 1. Get all users with the specified counsellorId
     const users = await userCollection.find({ counsellorId }).toArray();
-    const userEmails = users.map(user => user.email);
+    const userEmails = users.map((user) => user.email);
 
     // 2. Total Students (count of users)
     const totalStudents = users.length;
@@ -214,25 +277,30 @@ module.exports.getCounsellorStats = async (req, res) => {
     const schools = await schoolCollection.countDocuments({ counsellorId });
 
     // 4. Fetch all task submissions by participant email
-    const taskSubmissions = await taskSubmissionCollection.find({ participantEmail: { $in: userEmails } }).toArray();
+    const taskSubmissions = await taskSubmissionCollection
+      .find({ participantEmail: { $in: userEmails } })
+      .toArray();
 
     // 5. Total Companies (distinct organizationIds from task submissions)
-    const totalCompanies = new Set(taskSubmissions.map(submission => submission.organizationId)).size;
+    const totalCompanies = new Set(
+      taskSubmissions.map((submission) => submission.organizationId)
+    ).size;
 
     // 6. Total Tasks (distinct taskIds from task submissions)
-    const totalTasks = new Set(taskSubmissions.map(submission => submission.taskId)).size;
+    const totalTasks = new Set(
+      taskSubmissions.map((submission) => submission.taskId)
+    ).size;
 
     res.json({
       totalStudents,
       totalSchools: schools,
       totalCompanies,
-      totalTasks
+      totalTasks,
     });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch counsellor statistics' });
+    res.status(500).json({ error: "Failed to fetch counsellor statistics" });
   }
-}
-
+};
 
 module.exports.getSchoolsWithTasksAndOrganizations = async (req, res) => {
   const { counsellorId } = req.params;
@@ -242,10 +310,12 @@ module.exports.getSchoolsWithTasksAndOrganizations = async (req, res) => {
     const schools = await schoolCollection.find({ counsellorId }).toArray();
 
     const schoolsWithDetails = await Promise.all(
-      schools.map(async school => {
+      schools.map(async (school) => {
         // Find users under the school
-        const users = await userCollection.find({ schoolId: school._id.toString() }).toArray();
-        const userEmails = users.map(user => user.email);
+        const users = await userCollection
+          .find({ schoolId: school._id.toString() })
+          .toArray();
+        const userEmails = users.map((user) => user.email);
 
         // Find task submissions by participant emails
         const taskSubmissions = await taskSubmissionCollection
@@ -253,26 +323,37 @@ module.exports.getSchoolsWithTasksAndOrganizations = async (req, res) => {
           .toArray();
 
         // Extract taskIds and organizationIds from task submissions
-        const taskIds = taskSubmissions.map(submission => submission.taskId.toString());
-        const organizationIds = taskSubmissions.map(submission => submission.organizationId.toString());
+        const taskIds = taskSubmissions.map((submission) =>
+          submission.taskId.toString()
+        );
+        const organizationIds = taskSubmissions.map((submission) =>
+          submission.organizationId.toString()
+        );
 
         // Find tasks and organizations using extracted IDs
-        const tasks = await taskCollection.find({ _id: { $in: taskIds.map(id => new ObjectId(id)) } }).toArray();
-        const organizations = await orgCollection.find({ _id: { $in: organizationIds.map(id => new ObjectId(id)) } }).toArray();
-        const students = await userCollection.find({ email: { $in: userEmails.map(email => email) } }).toArray();
+        const tasks = await taskCollection
+          .find({ _id: { $in: taskIds.map((id) => new ObjectId(id)) } })
+          .toArray();
+        const organizations = await orgCollection
+          .find({ _id: { $in: organizationIds.map((id) => new ObjectId(id)) } })
+          .toArray();
+        const students = await userCollection
+          .find({ email: { $in: userEmails.map((email) => email) } })
+          .toArray();
 
         return {
           school,
           students,
           tasks,
-          organizations
+          organizations,
         };
       })
     );
 
     res.json(schoolsWithDetails);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch schools with tasks and organizations' });
+    res
+      .status(500)
+      .json({ error: "Failed to fetch schools with tasks and organizations" });
   }
 };
-
