@@ -357,3 +357,33 @@ module.exports.getSchoolsWithTasksAndOrganizations = async (req, res) => {
       .json({ error: "Failed to fetch schools with tasks and organizations" });
   }
 };
+
+module.exports.getSubmissionStatusByCounsellorId = async (req, res) => {
+  const { counsellorId } = req.params;
+
+  try {
+    const totalStudents = await userCollection.countDocuments({ counsellorId });
+    const submissionStatusCounts = await taskSubmissionCollection.aggregate([
+      { $match: { counsellorId } }, // Match submissions with the given counsellorId
+      {
+        $group: {
+          _id: '$submissionStatus', // Group by submissionStatus field
+          count: { $sum: 1 }, // Count occurrences of each status
+          submissions: { $push: '$$ROOT' }
+        },
+      },
+      {
+        $project: {
+          _id: 0, // Exclude the _id field from the result
+          submissionStatus: '$_id', // Rename _id as submissionStatus
+          count: 1, // Include the count field in the result
+          submissions: 1,
+        },
+      },
+    ]).toArray();
+
+    res.json({ totalStudents, submissionStatusCounts });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch submission status counts' });
+  }
+};

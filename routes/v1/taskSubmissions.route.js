@@ -39,4 +39,9 @@ router
   .route("/getSchoolsWithTasksAndOrganizations/counsellorId/:counsellorId")
   .get(taskSubmissionsController.getSchoolsWithTasksAndOrganizations);
 
+router
+  .route("/getSubmissionStatusByCounsellorId/counsellorId/:counsellorId")
+  .get(taskSubmissionsController.getSubmissionStatusByCounsellorId);
+
+
 module.exports = router;
