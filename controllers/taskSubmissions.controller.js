@@ -260,7 +260,7 @@ module.exports.getSchoolsWithTasksAndOrganizations = async (req, res) => {
         const tasks = await taskCollection.find({ _id: { $in: taskIds.map(id => new ObjectId(id)) } }).toArray();
         const organizations = await orgCollection.find({ _id: { $in: organizationIds.map(id => new ObjectId(id)) } }).toArray();
         const students = await userCollection.find({ email: { $in: userEmails.map(email => email) } }).toArray();
-  
+
         return {
           school,
           students,
@@ -275,5 +275,4 @@ module.exports.getSchoolsWithTasksAndOrganizations = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch schools with tasks and organizations' });
   }
 };
-
 
