@@ -5,9 +5,9 @@ const router = express.Router();
 
 router
   .route("/")
-  .get(testControllers.getAllTest)
-  .post(testControllers.getAllTest);
+  // .get(testControllers.getAllTest)
+  .put(testControllers.getAllTest);
 
-router.route("/:id").delete(testControllers.deleteATest);
+// router.route("/:id").delete(testControllers.deleteATest);
 
 module.exports = router;
