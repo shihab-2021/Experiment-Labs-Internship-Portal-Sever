@@ -14,6 +14,7 @@ const taskRoutes = require("./routes/v1/tasks.route");
 const taskSubmissionRoutes = require("./routes/v1/taskSubmissions.route");
 const statRoutes = require("./routes/v1/stats.route");
 const categoryRoutes = require("./routes/v1/categories.route");
+const schoolRoutes = require("./routes/v1/schools.route");
 
 app.get("/", (req, res) => {
   res.send("Hello world");
@@ -55,6 +56,7 @@ app.use("/api/v1/uploadFile", uploadFileRoutes);
 
 //For stats
 app.use("/api/v1/stats", statRoutes);
+app.use("/api/v1/schools", schoolRoutes);
 
 app.get("/", (req, res) => {
   res.send("Experiment Labs server is running");
