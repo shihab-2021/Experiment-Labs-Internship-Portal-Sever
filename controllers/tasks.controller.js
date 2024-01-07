@@ -85,14 +85,8 @@ module.exports.applyForTask = async (req, res, next) => {
     }
 
     const insertedSubmission = await taskSubmissionCollection.insertOne({
-      aboutSolution: "",
-      fileLink: "",
-      participantEmail: participantEmail,
       taskId: taskId,
-      organizationId: organizationId,
-      submissionDateTime: "",
-      applyDateTime: applyDateTime,
-      submissionStatus: "Pending",
+      ...req.body,
     });
 
     // Add participant application to the task
@@ -142,6 +136,7 @@ module.exports.submitATask = async (req, res, next) => {
           aboutSolution: newSubmission.aboutSolution,
           fileLink: newSubmission.fileLink,
           submissionDateTime: newSubmission.submissionDateTime,
+          submissionStatus: newSubmission.submissionStatus,
         },
       });
     }
