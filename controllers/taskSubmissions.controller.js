@@ -308,7 +308,6 @@ module.exports.getSchoolsWithTasksAndOrganizations = async (req, res) => {
   try {
     // Fetch schools under the same counsellorId
     const schools = await schoolCollection.find({ counsellorId }).toArray();
-
     const schoolsWithDetails = await Promise.all(
       schools.map(async (school) => {
         // Find users under the school
@@ -317,10 +316,13 @@ module.exports.getSchoolsWithTasksAndOrganizations = async (req, res) => {
           .toArray();
         const userEmails = users.map((user) => user.email);
 
+
+
         // Find task submissions by participant emails
         const taskSubmissions = await taskSubmissionCollection
           .find({ participantEmail: { $in: userEmails } })
           .toArray();
+
 
         // Extract taskIds and organizationIds from task submissions
         const taskIds = taskSubmissions.map((submission) =>
@@ -352,11 +354,12 @@ module.exports.getSchoolsWithTasksAndOrganizations = async (req, res) => {
 
     res.json(schoolsWithDetails);
   } catch (error) {
-    res
-      .status(500)
-      .json({ error: "Failed to fetch schools with tasks and organizations" });
+
+    console.error('Error fetching data:', error);
+    res.status(500).json({ error: 'Failed to fetch schools with tasks and organizations' });
   }
 };
+
 
 module.exports.getSubmissionStatusByCounsellorId = async (req, res) => {
   const { counsellorId } = req.params;
