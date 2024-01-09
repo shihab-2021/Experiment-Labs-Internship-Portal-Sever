@@ -52,7 +52,7 @@ module.exports.sendAnEmail = async (req, res) => {
         const mailOptions = {
             from: fromEmail,
             to: toEmail,
-            subject: subject + " from " + fromEmail,
+            subject: subject,
             text: text
         };
 

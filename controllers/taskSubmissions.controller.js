@@ -354,7 +354,6 @@ module.exports.getSchoolsWithTasksAndOrganizations = async (req, res) => {
 
     res.json(schoolsWithDetails);
   } catch (error) {
-
     console.error('Error fetching data:', error);
     res.status(500).json({ error: 'Failed to fetch schools with tasks and organizations' });
   }
