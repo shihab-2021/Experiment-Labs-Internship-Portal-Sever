@@ -56,8 +56,11 @@ module.exports.sendAnEmail = async (req, res) => {
             text: text
         };
 
-        transporter.sendMail(mailOptions);
-        res.send({ success: true, message: "Email Sent Successfully" });
+        const isSent = await transporter.sendMail(mailOptions);
+        console.log(isSent);
+
+        if (isSent)
+            res.send({ success: true, message: "Email Sent Successfully" });
 
 
     } catch (error) {
