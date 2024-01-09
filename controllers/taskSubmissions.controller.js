@@ -360,7 +360,6 @@ module.exports.getSchoolsWithTasksAndOrganizations = async (req, res) => {
 };
 
 
-
 module.exports.getSubmissionStatusByCounsellorId = async (req, res) => {
   const { counsellorId } = req.params;
 
