@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5001;
 const errorHandler = require("./middleware/errorHandler");
 const testRoutes = require("./routes/v1/test.route");
 const uploadFileRoutes = require("./routes/v1/uploadFile.route");
@@ -15,6 +15,7 @@ const taskSubmissionRoutes = require("./routes/v1/taskSubmissions.route");
 const statRoutes = require("./routes/v1/stats.route");
 const categoryRoutes = require("./routes/v1/categories.route");
 const schoolRoutes = require("./routes/v1/schools.route");
+const emailRoutes = require("./routes/v1/email.route");
 
 app.get("/", (req, res) => {
   res.send("Hello world");
@@ -57,6 +58,7 @@ app.use("/api/v1/uploadFile", uploadFileRoutes);
 //For stats
 app.use("/api/v1/stats", statRoutes);
 app.use("/api/v1/schools", schoolRoutes);
+app.use("/api/v1/emails", emailRoutes);
 
 app.get("/", (req, res) => {
   res.send("Experiment Labs server is running");
