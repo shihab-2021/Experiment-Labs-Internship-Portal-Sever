@@ -12,6 +12,10 @@ router
   .get(taskSubmissionsController.generateCounsellorLeaderBoard);
 
 router
+  .route("/leaderBoard/schoolId/:schoolId")
+  .get(taskSubmissionsController.generateSchoolLeaderBoard);
+
+router
   .route("/submissionStatus/:submissionStatus")
   .get(taskSubmissionsController.getTaskSubmissionsBySubmissionStatus);
 
@@ -43,6 +47,5 @@ router
 router
   .route("/getSubmissionStatusByCounsellorId/counsellorId/:counsellorId")
   .get(taskSubmissionsController.getSubmissionStatusByCounsellorId);
-
 
 module.exports = router;
