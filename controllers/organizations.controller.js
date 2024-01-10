@@ -73,7 +73,12 @@ module.exports.updateAnOrganization = async (req, res, next) => {
 };
 
 module.exports.getAnOrganization = async (req, res, next) => {
-  const orgId = req.params.id;
-  const result = await orgCollection.findOne({ _id: new ObjectId(orgId) });
-  res.send(result);
+  try {
+    const orgId = req.params.id;
+    const result = await orgCollection.findOne({ _id: new ObjectId(orgId) });
+    res.send(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 };
