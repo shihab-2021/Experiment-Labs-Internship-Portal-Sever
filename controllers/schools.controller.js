@@ -6,6 +6,9 @@ const schoolCollection = client
 const taskSubmissionCollection = client
   .db("ExperimentLabsInternshipPortal")
   .collection("taskSubmissions");
+const userCollection = client
+  .db("ExperimentLabsInternshipPortal")
+  .collection("users");
 
 module.exports.getSchoolsByCounsellorId = async (req, res, next) => {
   const { counsellorId } = req.params;
@@ -24,78 +27,6 @@ module.exports.getASchoolById = async (req, res, next) => {
 //   const { schoolId } = req.params;
 
 //   try {
-//     // Find unique tasks applied by students of the school
-//     const submissionsQuery = {
-//       schoolId,
-//     };
-
-//     const submissions = await taskSubmissionCollection
-//       .find(submissionsQuery)
-//       .toArray();
-
-//     const uniqueTaskIds = new Set();
-
-//     submissions.forEach((submission) => {
-//       uniqueTaskIds.add(submission.taskId);
-//     });
-
-//     const uniqueTasksCount = uniqueTaskIds.size;
-//     const uniqueTaskIdsList = Array.from(uniqueTaskIds);
-
-//     res.status(200).json({
-//       schoolId,
-//       uniqueTasksCount,
-//       uniqueTaskIds: uniqueTaskIdsList,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: "Internal server error" });
-//   }
-// };
-
-// module.exports.getSchoolTasks = async (req, res, next) => {
-//   const { schoolId } = req.params;
-
-//   try {
-//     // Find unique tasks and organizations applied by students of the school
-//     const submissionsQuery = {
-//       schoolId,
-//     };
-
-//     const submissions = await taskSubmissionCollection
-//       .find(submissionsQuery)
-//       .toArray();
-
-//     const uniqueTaskIds = new Set();
-//     const uniqueOrganizationIds = new Set();
-
-//     submissions.forEach((submission) => {
-//       uniqueTaskIds.add(submission.taskId);
-//       uniqueOrganizationIds.add(submission.organizationId);
-//     });
-
-//     const uniqueTasksCount = uniqueTaskIds.size;
-//     const uniqueTaskIdsList = Array.from(uniqueTaskIds);
-//     const uniqueOrganizationsCount = uniqueOrganizationIds.size;
-//     const uniqueOrganizationIdsList = Array.from(uniqueOrganizationIds);
-
-//     res.status(200).json({
-//       schoolId,
-//       uniqueTasksCount,
-//       uniqueTaskIds: uniqueTaskIdsList,
-//       uniqueOrganizationsCount,
-//       uniqueOrganizationIds: uniqueOrganizationIdsList,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: "Internal server error" });
-//   }
-// };
-
-// module.exports.getSchoolTasks = async (req, res, next) => {
-//   const { schoolId } = req.params;
-
-//   try {
 //     // Find unique tasks and organizations applied by students of the school
 //     const submissionsQuery = {
 //       schoolId,
@@ -108,6 +39,7 @@ module.exports.getASchoolById = async (req, res, next) => {
 //     const uniqueTaskIds = new Set();
 //     const uniqueOrganizationIds = new Set();
 //     const selectedSubmissions = [];
+//     const rejectedSubmissions = [];
 
 //     submissions.forEach((submission) => {
 //       uniqueTaskIds.add(submission.taskId);
@@ -115,6 +47,8 @@ module.exports.getASchoolById = async (req, res, next) => {
 
 //       if (submission.submissionStatus === "Selected") {
 //         selectedSubmissions.push(submission);
+//       } else if (submission.submissionStatus === "Rejected") {
+//         rejectedSubmissions.push(submission);
 //       }
 //     });
 
@@ -126,10 +60,9 @@ module.exports.getASchoolById = async (req, res, next) => {
 //     res.status(200).json({
 //       schoolId,
 //       uniqueTasksCount,
-//       uniqueTaskIds: uniqueTaskIdsList,
 //       uniqueOrganizationsCount,
-//       uniqueOrganizationIds: uniqueOrganizationIdsList,
-//       selectedSubmissions,
+//       selectedSubmissionCount: selectedSubmissions.length,
+//       rejectedSubmissionCount: rejectedSubmissions.length,
 //     });
 //   } catch (error) {
 //     console.error(error);
@@ -171,14 +104,21 @@ module.exports.getSchoolTasks = async (req, res, next) => {
     const uniqueOrganizationsCount = uniqueOrganizationIds.size;
     const uniqueOrganizationIdsList = Array.from(uniqueOrganizationIds);
 
+    const studentsQuery = {
+      schoolId,
+    };
+    const students = await userCollection.find(studentsQuery).toArray();
+    const totalStudentsCount = students.length;
+
     res.status(200).json({
       schoolId,
       uniqueTasksCount,
-      //   uniqueTaskIds: uniqueTaskIdsList,
+      // uniqueTaskIds: uniqueTaskIdsList,
       uniqueOrganizationsCount,
-      //   uniqueOrganizationIds: uniqueOrganizationIdsList,
+      // uniqueOrganizationIds: uniqueOrganizationIdsList,
       selectedSubmissionCount: selectedSubmissions.length,
       rejectedSubmissionCount: rejectedSubmissions.length,
+      totalStudentsCount,
     });
   } catch (error) {
     console.error(error);
