@@ -225,6 +225,69 @@ module.exports.generateCounsellorLeaderBoard = async (req, res, next) => {
   }
 };
 
+module.exports.generateSchoolLeaderBoard = async (req, res, next) => {
+  const { schoolId } = req.params;
+
+  try {
+    // Fetch submissions for students of the given school within the last three months
+    const threeMonthsAgo = new Date();
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
+    const submissionsQuery = {
+      schoolId,
+      submissionDateTime: {
+        $gte: threeMonthsAgo.toISOString(),
+        $lt: new Date().toISOString(),
+      },
+      submissionStatus: "Selected",
+    };
+
+    const submissions = await taskSubmissionCollection
+      .find(submissionsQuery)
+      .toArray();
+
+    // Calculate work hours for each student
+    const studentWorkHours = {};
+
+    await Promise.all(
+      submissions.map(async (submission) => {
+        const task = await taskCollection.findOne({
+          _id: new ObjectId(submission?.taskId),
+        });
+
+        const taskTime = task ? parseInt(task.taskTime) : 0;
+        const participantEmail = submission.participantEmail;
+
+        if (!studentWorkHours[participantEmail]) {
+          studentWorkHours[participantEmail] = 0;
+        }
+        studentWorkHours[participantEmail] += taskTime;
+      })
+    );
+
+    const sortedParticipants = Object.entries(studentWorkHours)
+      .sort(([, hoursA], [, hoursB]) => hoursB - hoursA)
+      .map(([email, hours]) => ({ email, hours }));
+
+    const usersInfo = await userCollection
+      .find({ email: { $in: sortedParticipants.map((p) => p.email) } })
+      .toArray();
+
+    // Merge user information with sortedParticipants array
+    const finalResult = sortedParticipants.map((participant) => {
+      const userInfo = usersInfo.find(
+        (user) => user.email === participant.email
+      );
+      return { ...participant, ...userInfo };
+    });
+
+    res.status(200).json(finalResult);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports.studentTasksByCounsellor = async (req, res, next) => {
   try {
     const { counsellorId } = req.params; // Extract the counsellorId from the request params
@@ -316,13 +379,10 @@ module.exports.getSchoolsWithTasksAndOrganizations = async (req, res) => {
           .toArray();
         const userEmails = users.map((user) => user.email);
 
-
-
         // Find task submissions by participant emails
         const taskSubmissions = await taskSubmissionCollection
           .find({ participantEmail: { $in: userEmails } })
           .toArray();
-
 
         // Extract taskIds and organizationIds from task submissions
         const taskIds = taskSubmissions.map((submission) =>
@@ -354,38 +414,41 @@ module.exports.getSchoolsWithTasksAndOrganizations = async (req, res) => {
 
     res.json(schoolsWithDetails);
   } catch (error) {
-    console.error('Error fetching data:', error);
-    res.status(500).json({ error: 'Failed to fetch schools with tasks and organizations' });
+    console.error("Error fetching data:", error);
+    res
+      .status(500)
+      .json({ error: "Failed to fetch schools with tasks and organizations" });
   }
 };
-
 
 module.exports.getSubmissionStatusByCounsellorId = async (req, res) => {
   const { counsellorId } = req.params;
 
   try {
     const totalStudents = await userCollection.countDocuments({ counsellorId });
-    const submissionStatusCounts = await taskSubmissionCollection.aggregate([
-      { $match: { counsellorId } }, // Match submissions with the given counsellorId
-      {
-        $group: {
-          _id: '$submissionStatus', // Group by submissionStatus field
-          count: { $sum: 1 }, // Count occurrences of each status
-          submissions: { $push: '$$ROOT' }
+    const submissionStatusCounts = await taskSubmissionCollection
+      .aggregate([
+        { $match: { counsellorId } }, // Match submissions with the given counsellorId
+        {
+          $group: {
+            _id: "$submissionStatus", // Group by submissionStatus field
+            count: { $sum: 1 }, // Count occurrences of each status
+            submissions: { $push: "$$ROOT" },
+          },
         },
-      },
-      {
-        $project: {
-          _id: 0, // Exclude the _id field from the result
-          submissionStatus: '$_id', // Rename _id as submissionStatus
-          count: 1, // Include the count field in the result
-          submissions: 1,
+        {
+          $project: {
+            _id: 0, // Exclude the _id field from the result
+            submissionStatus: "$_id", // Rename _id as submissionStatus
+            count: 1, // Include the count field in the result
+            submissions: 1,
+          },
         },
-      },
-    ]).toArray();
+      ])
+      .toArray();
 
     res.json({ totalStudents, submissionStatusCounts });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch submission status counts' });
+    res.status(500).json({ error: "Failed to fetch submission status counts" });
   }
 };
