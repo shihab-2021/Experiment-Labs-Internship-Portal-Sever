@@ -23,54 +23,7 @@ module.exports.getASchoolById = async (req, res, next) => {
   res.send(school);
 };
 
-// module.exports.getSchoolTasks = async (req, res, next) => {
-//   const { schoolId } = req.params;
-
-//   try {
-//     // Find unique tasks and organizations applied by students of the school
-//     const submissionsQuery = {
-//       schoolId,
-//     };
-
-//     const submissions = await taskSubmissionCollection
-//       .find(submissionsQuery)
-//       .toArray();
-
-//     const uniqueTaskIds = new Set();
-//     const uniqueOrganizationIds = new Set();
-//     const selectedSubmissions = [];
-//     const rejectedSubmissions = [];
-
-//     submissions.forEach((submission) => {
-//       uniqueTaskIds.add(submission.taskId);
-//       uniqueOrganizationIds.add(submission.organizationId);
-
-//       if (submission.submissionStatus === "Selected") {
-//         selectedSubmissions.push(submission);
-//       } else if (submission.submissionStatus === "Rejected") {
-//         rejectedSubmissions.push(submission);
-//       }
-//     });
-
-//     const uniqueTasksCount = uniqueTaskIds.size;
-//     const uniqueTaskIdsList = Array.from(uniqueTaskIds);
-//     const uniqueOrganizationsCount = uniqueOrganizationIds.size;
-//     const uniqueOrganizationIdsList = Array.from(uniqueOrganizationIds);
-
-//     res.status(200).json({
-//       schoolId,
-//       uniqueTasksCount,
-//       uniqueOrganizationsCount,
-//       selectedSubmissionCount: selectedSubmissions.length,
-//       rejectedSubmissionCount: rejectedSubmissions.length,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: "Internal server error" });
-//   }
-// };
-
-module.exports.getSchoolTasks = async (req, res, next) => {
+module.exports.getSchoolStatisticalData = async (req, res, next) => {
   const { schoolId } = req.params;
 
   try {
