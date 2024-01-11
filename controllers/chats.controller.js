@@ -22,6 +22,7 @@ module.exports.createChat = async (req, res, next) => {
 
         res.status(201).json({
             success: true,
+            isSendMessage: true,
             message: 'Chat created successfully',
             chatId: result.insertedId,
             result
@@ -67,9 +68,15 @@ module.exports.getChatByUserId = async (req, res, next) => {
             })
         );
 
+        const sortedChats = chatsWithUserInfo.sort((a, b) => {
+            const createdAtA = a.latestMessage.createdAt;
+            const createdAtB = b.latestMessage.createdAt;
+            return createdAtB - createdAtA;
+        });
+
         res.status(200).send({
             success: true,
-            userChats: chatsWithUserInfo
+            userChats: sortedChats
         });
     } catch (error) {
         res.status(500).json({
@@ -109,10 +116,17 @@ module.exports.getAllChatsWithUserInfo = async (req, res) => {
             })
         );
 
+        const sortedChats = chatsWithUserInfo.sort((a, b) => {
+            const createdAtA = a.latestMessage.createdAt;
+            const createdAtB = b.latestMessage.createdAt;
+            return createdAtB - createdAtA;
+        });
+
         res.status(200).send({
             success: true,
-            userChats: chatsWithUserInfo
+            userChats: sortedChats
         });
+
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch chats with user and organization info' });
     }

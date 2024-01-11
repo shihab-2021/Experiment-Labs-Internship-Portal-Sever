@@ -14,10 +14,15 @@ module.exports.saveATask = async (req, res, next) => {
 };
 
 module.exports.getATaskById = async (req, res, next) => {
-  const { id } = req.params;
-  const query = { _id: new ObjectId(id) };
-  const user = await taskCollection.findOne(query);
-  res.send(user);
+  try {
+    const { id } = req.params;
+    const query = { _id: new ObjectId(id) };
+    const user = await taskCollection.findOne(query);
+    res.send(user);
+  } catch (error) {
+    console.log(error);
+    res.send(error);
+  }
 };
 
 module.exports.getTasksByOrganizationAndStatus = async (req, res, next) => {
