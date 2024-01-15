@@ -386,10 +386,10 @@ module.exports.getSchoolsWithTasksAndOrganizations = async (req, res) => {
 
         // Extract taskIds and organizationIds from task submissions
         const taskIds = taskSubmissions.map((submission) =>
-          submission.taskId.toString()
+          submission.taskId ? submission.taskId.toString() : null
         );
         const organizationIds = taskSubmissions.map((submission) =>
-          submission.organizationId.toString()
+          submission.organizationId ? submission.organizationId.toString() : null
         );
 
         // Find tasks and organizations using extracted IDs
