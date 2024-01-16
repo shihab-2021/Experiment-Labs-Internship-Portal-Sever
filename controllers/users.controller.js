@@ -3,6 +3,9 @@ const client = require("../utils/dbConnect");
 const userCollection = client
   .db("ExperimentLabsInternshipPortal")
   .collection("users");
+const taskSubmissionCollection = client
+  .db("ExperimentLabsInternshipPortal")
+  .collection("taskSubmissions");
 
 const firebaseUtils = require("../utils/firebaseSignUp");
 const passwordUtils = require("../utils/generatePassword");
@@ -266,5 +269,43 @@ module.exports.addBulkStudent = async (req, res) => {
     res
       .status(500)
       .json({ message: "Error adding users", error: error.message });
+  }
+};
+
+module.exports.studentsAndTasksByCounsellorAndSchool = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const { counsellorId, schoolId } = req.params; // Extract the counsellorId and schoolId from the request params
+
+    // Find all users with the given counsellorId and schoolId
+    const users = await userCollection
+      .find({ counsellorId, schoolId })
+      .toArray();
+
+    // For each user, find their task submissions using the email
+    const taskSubmissions = await Promise.all(
+      users.map(async (user) => {
+        const { email } = user;
+
+        // Find task submissions for the user using their email
+        const userTaskSubmissions = await taskSubmissionCollection
+          .find({ participantEmail: email })
+          .toArray();
+
+        return {
+          user,
+          taskSubmissions: userTaskSubmissions,
+        };
+      })
+    );
+
+    res.json(taskSubmissions);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Failed to fetch task submissions for users" });
   }
 };
