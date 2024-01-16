@@ -29,4 +29,8 @@ router.route("/bulk").post(userControllers.addBulkUsers);
 
 router.route("/addBulkStudent").post(userControllers.addBulkStudent);
 
+router
+  .route("/counsellorId/:counsellorId/schoolId/:schoolId")
+  .get(userControllers.studentsAndTasksByCounsellorAndSchool);
+
 module.exports = router;

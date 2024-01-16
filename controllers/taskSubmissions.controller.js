@@ -389,7 +389,9 @@ module.exports.getSchoolsWithTasksAndOrganizations = async (req, res) => {
           submission.taskId ? submission.taskId.toString() : null
         );
         const organizationIds = taskSubmissions.map((submission) =>
-          submission.organizationId ? submission.organizationId.toString() : null
+          submission.organizationId
+            ? submission.organizationId.toString()
+            : null
         );
 
         // Find tasks and organizations using extracted IDs
@@ -429,6 +431,38 @@ module.exports.getSubmissionStatusByCounsellorId = async (req, res) => {
     const submissionStatusCounts = await taskSubmissionCollection
       .aggregate([
         { $match: { counsellorId } }, // Match submissions with the given counsellorId
+        {
+          $group: {
+            _id: "$submissionStatus", // Group by submissionStatus field
+            count: { $sum: 1 }, // Count occurrences of each status
+            submissions: { $push: "$$ROOT" },
+          },
+        },
+        {
+          $project: {
+            _id: 0, // Exclude the _id field from the result
+            submissionStatus: "$_id", // Rename _id as submissionStatus
+            count: 1, // Include the count field in the result
+            submissions: 1,
+          },
+        },
+      ])
+      .toArray();
+
+    res.json({ totalStudents, submissionStatusCounts });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch submission status counts" });
+  }
+};
+
+module.exports.getStudentsTasksStatisticBySchoolId = async (req, res) => {
+  const { schoolId } = req.params;
+
+  try {
+    const totalStudents = await userCollection.countDocuments({ schoolId });
+    const submissionStatusCounts = await taskSubmissionCollection
+      .aggregate([
+        { $match: { schoolId } }, // Match submissions with the given schoolId
         {
           $group: {
             _id: "$submissionStatus", // Group by submissionStatus field

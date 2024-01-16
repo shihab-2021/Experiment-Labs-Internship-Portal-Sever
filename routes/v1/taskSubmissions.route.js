@@ -48,4 +48,8 @@ router
   .route("/getSubmissionStatusByCounsellorId/counsellorId/:counsellorId")
   .get(taskSubmissionsController.getSubmissionStatusByCounsellorId);
 
+router
+  .route("/studentsTasksStatistic/schoolId/:schoolId")
+  .get(taskSubmissionsController.getStudentsTasksStatisticBySchoolId);
+
 module.exports = router;
