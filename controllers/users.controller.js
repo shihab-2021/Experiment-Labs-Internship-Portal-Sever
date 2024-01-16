@@ -211,13 +211,56 @@ module.exports.addBulkUsers = async (req, res) => {
     const insertedUsers = await userCollection.insertMany(users);
     const count = await userCollection.countDocuments();
 
+    res.status(200).json({
+      message: "Users added to MongoDB and Firebase successfully",
+      insertedUsers,
+      count,
+    });
+  } catch (error) {
+    console.error("Error adding users:", error);
     res
-      .status(200)
-      .json({
-        message: "Users added to MongoDB and Firebase successfully",
-        insertedUsers,
-        count,
-      });
+      .status(500)
+      .json({ message: "Error adding users", error: error.message });
+  }
+};
+
+module.exports.addBulkStudent = async (req, res) => {
+  const { users, relatedData } = req.body;
+  console.log(users, relatedData);
+
+  try {
+    // Add users to Firebase using the function
+    for (const user of users) {
+      // Merge each item of relatedData into the user object
+      Object.assign(user, relatedData);
+
+      // Generate a custom password
+      const password = passwordUtils.generateCustomPassword(user);
+      user.password = password;
+
+      const result = await firebaseUtils.createUserWithEmailAndPassword(
+        user.email,
+        password
+      );
+      console.log(user);
+
+      if (!result.success) {
+        console.error(
+          `Failed to create user in Firebase for email: ${user.email}`
+        );
+        // Handle error case: Maybe remove the user from MongoDB?
+      } else {
+        // Insert all users into MongoDB
+        const insertedUsers = await userCollection.insertMany(users);
+        const count = await userCollection.countDocuments();
+      }
+    }
+
+    res.status(200).json({
+      message: "Users added to MongoDB and Firebase successfully",
+      insertedUsers,
+      count,
+    });
   } catch (error) {
     console.error("Error adding users:", error);
     res
