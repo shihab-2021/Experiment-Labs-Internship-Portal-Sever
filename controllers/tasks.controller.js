@@ -55,6 +55,22 @@ module.exports.getAllTask = async (req, res, next) => {
   res.send(result);
 };
 
+module.exports.getTasksToShow = async (req, res, next) => {
+  try {
+    // Define the allowed task statuses (AdminApproved and Processing)
+    const allowedStatuses = ["AdminApproved", "Processing"];
+
+    // Fetch tasks with the specified taskStatus values
+    const tasks = await taskCollection
+      .find({ taskStatus: { $in: allowedStatuses } })
+      .toArray();
+
+    res.json(tasks);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch tasks" });
+  }
+};
+
 module.exports.deleteATask = async (req, res, next) => {
   const { id } = req.params;
   const result = await taskCollection.deleteOne({ _id: new ObjectId(id) });

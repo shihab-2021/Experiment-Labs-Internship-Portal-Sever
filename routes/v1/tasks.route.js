@@ -31,6 +31,8 @@ router.route("/applyTask/:taskId").put(tasksControllers.applyForTask);
 
 router.route("/submitTask").post(tasksControllers.submitATask);
 
+router.route("/showTasks").get(tasksControllers.getTasksToShow);
+
 router
   .route("/organizationId/:organizationId/creatorEmail/:creatorEmail")
   .get(tasksControllers.getTasksByOrganizationAndCreator);
