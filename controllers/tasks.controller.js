@@ -58,7 +58,7 @@ module.exports.getAllTask = async (req, res, next) => {
 module.exports.getTasksToShow = async (req, res, next) => {
   try {
     // Define the allowed task statuses (AdminApproved and Processing)
-    const allowedStatuses = ["AdminApproved", "Processing"];
+    const allowedStatuses = ["AdminApproved", "Processing", "Pending"];
 
     // Fetch tasks with the specified taskStatus values
     const tasks = await taskCollection
