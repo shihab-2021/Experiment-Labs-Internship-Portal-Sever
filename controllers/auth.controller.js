@@ -135,9 +135,9 @@ module.exports.createUser = async (req, res, next) => {
 //   });
 // };
 
-// module.exports.decodeToken = async (req, res, next) => {
-//   const decoded = jwt.verify(req.body.token, process.env.stride_token_secret);
-//   res.send({
-//     decoded,
-//   });
-// };
+module.exports.decodeToken = async (req, res, next) => {
+  const decoded = jwt.verify(req.body.token, process.env.stride_token_secret);
+  res.send({
+    decoded,
+  });
+};
