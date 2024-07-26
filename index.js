@@ -16,6 +16,7 @@ const statRoutes = require("./routes/v1/stats.route");
 const categoryRoutes = require("./routes/v1/categories.route");
 const schoolRoutes = require("./routes/v1/schools.route");
 const emailRoutes = require("./routes/v1/email.route");
+const authRoutes = require("./routes/v1/auth.route");
 
 app.get("/", (req, res) => {
   res.send("Hello world");
@@ -59,6 +60,7 @@ app.use("/api/v1/uploadFile", uploadFileRoutes);
 app.use("/api/v1/stats", statRoutes);
 app.use("/api/v1/schools", schoolRoutes);
 app.use("/api/v1/emails", emailRoutes);
+app.use("/api/v1/auth", authRoutes);
 
 app.get("/", (req, res) => {
   res.send("Experiment Labs server is running");
