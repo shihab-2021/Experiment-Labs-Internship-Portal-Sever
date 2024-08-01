@@ -42,8 +42,6 @@ module.exports.createUser = async (req, res, next) => {
       officialEmail: school.officialEmail,
     });
 
-    
-
     if (isSchoolExists) {
       schoolId = isSchoolExists._id.toString();
     } else {
@@ -60,16 +58,15 @@ module.exports.createUser = async (req, res, next) => {
       schoolId = schoolInsertData.insertedId.toString();
     }
 
-    
     if (!user?.email) {
       return res.status(400).json({
         success: false,
         message: "Please provide an email!",
       });
     }
-    
+
     const isUserExists = await userCollection.findOne({ email: user?.email });
-    
+
     if (isUserExists) {
       const newUser = await firebaseGetUser(user?.email);
       if (newUser?.uid) {
@@ -91,9 +88,9 @@ module.exports.createUser = async (req, res, next) => {
 
     user.password = generateCustomPassword(user);
 
-    if (user.role === "Counsellor") {
+    if (user.role.toLowerCase() === "counsellor") {
       userData = getCounsellorDataFormat(user);
-    } else if (user.role === "SchoolAdmin") {
+    } else if (user.role.toLowerCase() === "institute") {
       userData = getSchoolAdminDataFormat(user, schoolId);
     } else {
       userData = getStudentDataFormat(user, schoolId);
@@ -128,16 +125,20 @@ module.exports.createUser = async (req, res, next) => {
   }
 };
 
-// module.exports.createTestToken = async (req, res, next) => {
-//   const result = createToken(req.body);
-//   res.send({
-//     token: result,
-//   });
-// };
+module.exports.createTestToken = async (req, res, next) => {
+  const result = createToken(req.body);
+  res.send({
+    token: result,
+  });
+};
 
 module.exports.decodeToken = async (req, res, next) => {
-  const decoded = jwt.verify(req.body.token, process.env.stride_token_secret);
-  res.send({
-    decoded,
-  });
+  try {
+    const decoded = jwt.verify(req.body.token, process.env.stride_token_secret);
+    res.send({
+      decoded,
+    });
+  } catch (error) {
+    console.log({error});
+  }
 };

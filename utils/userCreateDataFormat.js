@@ -4,7 +4,7 @@ const getCounsellorDataFormat = (payload) => {
     ...getCounsellorData,
     organizations: [
       {
-        role,
+        role: 'Counsellor',
         counsellorId,
       },
     ],
@@ -17,7 +17,7 @@ const getSchoolAdminDataFormat = (payload, schoolId) => {
     ...getSchoolAdminData,
     organizations: [
       {
-        role,
+        role: 'SchoolAdmin',
         counsellorId,
         schoolId,
       },
